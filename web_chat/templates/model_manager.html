@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI NEXUS - 模型管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d0d0f;
+            --bg-secondary: #16161a;
+            --bg-tertiary: #1e1e24;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-tertiary: #71717a;
+            --accent-cyan: #00ffaa;
+            --accent-magenta: #ff6b9d;
+            --accent-yellow: #ffd93d;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --glow-cyan: rgba(0, 255, 170, 0.15);
+        }
+
+        body.light-theme {
+            --bg-primary: #fafafa;
+            --bg-secondary: #f0f0f2;
+            --bg-tertiary: #e5e5e8;
+            --text-primary: #18181b;
+            --text-secondary: #52525b;
+            --text-tertiary: #71717a;
+            --border-color: rgba(0, 0, 0, 0.06);
+            --glow-cyan: rgba(0, 255, 170, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, var(--glow-cyan) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255, 107, 157, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Glass morphism container */
+        .glass-container {
+            background: rgba(22, 22, 26, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .light-theme .glass-container {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Modal overlay */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 24px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .light-theme .modal-overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        /* Modal content */
+        .modal-content {
+            width: 100%;
+            max-width: 640px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            transform: scale(0.95) translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        /* Custom scrollbar */
+        .modal-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* Form sections */
+        .form-section {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-section:last-child {
+            border-bottom: none;
+        }
+
+        /* Section title */
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        /* Form group */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Form label */
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-label .required {
+            color: var(--accent-magenta);
+            margin-left: 2px;
+        }
+
+        .form-label .hint {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            font-weight: 400;
+            margin-left: 8px;
+        }
+
+        /* Form input */
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px var(--glow-cyan);
+        }
+
+        .form-input::placeholder, .form-textarea::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        /* Select dropdown styling */
+        .form-select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23a1a1aa' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+
+        /* API type badges */
+        .api-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .api-type-option {
+            position: relative;
+        }
+
+        .api-type-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .api-type-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .api-type-label:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 255, 170, 0.05);
+        }
+
+        .api-type-option input[type="radio"]:checked + .api-type-label {
+            border-color: var(--accent-cyan);
+            background: var(--glow-cyan);
+        }
+
+        .api-type-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .api-type-info {
+            flex: 1;
+        }
+
+        .api-type-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .api-type-desc {
+            font-size: 11px;
+            color: var(--text-tertiary);
+            margin-top: 2px;
+        }
+
+        /* Icon selector */
+        .icon-selector {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .icon-option {
+            position: relative;
+        }
+
+        .icon-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .icon-label {
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+
+        .icon-label:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        .icon-option input[type="radio"]:checked + .icon-label {
+            border-color: var(--accent-cyan);
+            background: var(--glow-cyan);
+            box-shadow: 0 0 0 3px var(--glow-cyan);
+        }
+
+        .icon-label img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        /* Upload button */
+        .upload-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 56px;
+            height: 56px;
+            background: var(--bg-tertiary);
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-tertiary);
+            font-size: 20px;
+        }
+
+        .upload-button:hover {
+            border-color: var(--accent-cyan);
+            color: var(--accent-cyan);
+        }
+
+        .upload-button span {
+            font-size: 9px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        #icon-upload-input {
+            display: none;
+        }
+
+        /* Dynamic field animation */
+        .dynamic-field {
+            display: none;
+            animation: slideDown 0.2s ease;
+        }
+
+        .dynamic-field.visible {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Action buttons */
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            padding: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-button {
+            flex: 1;
+            padding: 14px 24px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .button-cancel {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .button-cancel:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .button-delete {
+            background: rgba(255, 71, 87, 0.1);
+            color: #ff4757;
+        }
+
+        .button-delete:hover {
+            background: rgba(255, 71, 87, 0.2);
+        }
+
+        .button-save {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #000;
+        }
+
+        .button-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--glow-cyan);
+        }
+
+        /* Modal header */
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-icon {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--glow-cyan);
+            border-radius: 10px;
+            font-size: 18px;
+        }
+
+        .close-button {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 18px;
+        }
+
+        .close-button:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Validation states */
+        .form-input.error, .form-select.error, .form-textarea.error {
+            border-color: #ff4757;
+        }
+
+        .error-message {
+            font-size: 11px;
+            color: #ff4757;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .form-input.error + .error-message,
+        .form-select.error + .error-message,
+        .form-textarea.error + .error-message {
+            display: block;
+        }
+
+        /* Theme toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent-cyan);
+        }
+
+        /* Demo trigger button */
+        .demo-trigger {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            color: #000;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .demo-trigger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px var(--glow-cyan);
+        }
+
+        /* Preset icons list */
+        .preset-icons {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="theme-toggle" title="切换主题">
+        <span class="theme-icon">🌙</span>
+    </button>
+
+    <!-- Demo Trigger Button -->
+    <button class="demo-trigger" id="open-modal">
+        + 添加新模型
+    </button>
+
+    <!-- Preset Icons (hidden) -->
+    <div class="preset-icons">
+        <div id="preset-icon-gemini" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <div id="preset-icon-openai" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" opacity="0.2"/>
+                <path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        <div id="preset-icon-anthropic" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2"/>
+                <path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        <div id="preset-icon-cohere" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/>
+                <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+        <div id="preset-icon-custom" style="display:none">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- Model Manager Modal -->
+    <div class="modal-overlay" id="model-modal">
+        <div class="modal-content glass-container">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <div class="modal-title">
+                    <div class="modal-icon">⚙️</div>
+                    <span id="modal-title-text">添加新模型</span>
+                </div>
+                <button class="close-button" id="close-modal">✕</button>
+            </div>
+
+            <!-- API Type Selection -->
+            <div class="form-section">
+                <div class="section-title">API 类型</div>
+                <div class="api-type-grid">
+                    <div class="api-type-option">
+                        <input type="radio" name="api_type" id="type_openai" value="openai" checked>
+                        <label class="api-type-label" for="type_openai">
+                            <div class="api-type-icon">🔷</div>
+                            <div class="api-type-info">
+                                <div class="api-type-name">OpenAI 兼容</div>
+                                <div class="api-type-desc">使用 OpenAI SDK</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="api-type-option">
+                        <input type="radio" name="api_type" id="type_google" value="google">
+                        <label class="api-type-label" for="type_google">
+                            <div class="api-type-icon">🔶</div>
+                            <div class="api-type-info">
+                                <div class="api-type-name">Google Gemini</div>
+                                <div class="api-type-desc">专用 SDK</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="api-type-option">
+                        <input type="radio" name="api_type" id="type_http" value="requests_sse">
+                        <label class="api-type-label" for="type_http">
+                            <div class="api-type-icon">🌐</div>
+                            <div class="api-type-info">
+                                <div class="api-type-name">HTTP + SSE</div>
+                                <div class="api-type-desc">通用流式接口</div>
+                            </div>
+                        </label>
+                    </div>
+                    <div class="api-type-option">
+                        <input type="radio" name="api_type" id="type_spark" value="spark_requests">
+                        <label class="api-type-label" for="type_spark">
+                            <div class="api-type-icon">⚡</div>
+                            <div class="api-type-info">
+                                <div class="api-type-name">Spark 特殊</div>
+                                <div class="api-type-desc">讯飞星火格式</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Basic Configuration -->
+            <div class="form-section">
+                <div class="section-title">基本配置</div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        模型 ID <span class="required">*</span>
+                        <span class="hint">唯一标识符，如: gpt4, claude-opus</span>
+                    </label>
+                    <input type="text" class="form-input" id="model-id" placeholder="custom-model" required>
+                    <div class="error-message">请输入模型 ID</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        模型名称 <span class="required">*</span>
+                        <span class="hint">显示名称，如: GPT-4, Claude Opus</span>
+                    </label>
+                    <input type="text" class="form-input" id="model-name" placeholder="Custom Model" required>
+                    <div class="error-message">请输入模型名称</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        模型标识 <span class="required">*</span>
+                        <span class="hint">API 调用的模型名称</span>
+                    </label>
+                    <input type="text" class="form-input" id="model-identifier" placeholder="gpt-4-turbo" required>
+                    <div class="error-message">请输入模型标识</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        API Key 环境变量名 <span class="required">*</span>
+                        <span class="hint">如: CUSTOM_API_KEY</span>
+                    </label>
+                    <input type="text" class="form-input" id="api-key-name" placeholder="CUSTOM_API_KEY" required>
+                    <div class="error-message">请输入 API Key 环境变量名</div>
+                </div>
+            </div>
+
+            <!-- API Configuration (Dynamic) -->
+            <div class="form-section">
+                <div class="section-title">API 配置</div>
+
+                <!-- Base URL (for OpenAI compatible) -->
+                <div class="form-group dynamic-field visible" id="field-base-url">
+                    <label class="form-label">
+                        API 基础 URL <span class="required">*</span>
+                        <span class="hint">OpenAI 兼容接口地址</span>
+                    </label>
+                    <input type="url" class="form-input" id="base-url" placeholder="https://api.openai.com/v1">
+                    <div class="error-message">请输入有效的 URL</div>
+                </div>
+
+                <!-- Full URL (for HTTP + SSE and Spark) -->
+                <div class="form-group dynamic-field" id="field-full-url">
+                    <label class="form-label">
+                        完整 API URL <span class="required">*</span>
+                        <span class="hint">包含完整路径的 API 地址</span>
+                    </label>
+                    <input type="url" class="form-input" id="full-url" placeholder="https://api.example.com/v1/chat/completions">
+                    <div class="error-message">请输入有效的 URL</div>
+                </div>
+
+                <!-- System Prompt (for OpenAI compatible only) -->
+                <div class="form-group dynamic-field visible" id="field-system-prompt">
+                    <label class="form-label">
+                        系统提示词
+                        <span class="hint">可选，设置模型的行为</span>
+                    </label>
+                    <textarea class="form-textarea" id="system-prompt" placeholder="You are a helpful assistant..."></textarea>
+                </div>
+            </div>
+
+            <!-- Icon Selection -->
+            <div class="form-section">
+                <div class="section-title">图标选择</div>
+                <div class="icon-selector">
+                    <div class="icon-option">
+                        <input type="radio" name="model_icon" id="icon_gemini" value="gemini">
+                        <label class="icon-label" for="icon_gemini">
+                            <img src="/assets/icons/gemini_logo.svg" alt="Gemini" onerror="this.parentElement.innerHTML='🔶'">
+                        </label>
+                    </div>
+                    <div class="icon-option">
+                        <input type="radio" name="model_icon" id="icon_openai" value="openai" checked>
+                        <label class="icon-label" for="icon_openai">
+                            <img src="/assets/icons/deepseek_logo.svg" alt="OpenAI" onerror="this.parentElement.innerHTML='🔷'">
+                        </label>
+                    </div>
+                    <div class="icon-option">
+                        <input type="radio" name="model_icon" id="icon_kimi" value="kimi">
+                        <label class="icon-label" for="icon_kimi">
+                            <img src="/assets/icons/kimi_logo.svg" alt="Kimi" onerror="this.parentElement.innerHTML='🌙'">
+                        </label>
+                    </div>
+                    <div class="icon-option">
+                        <input type="radio" name="model_icon" id="icon_qwen" value="qwen">
+                        <label class="icon-label" for="icon_qwen">
+                            <img src="/assets/icons/qwen_logo.svg" alt="Qwen" onerror="this.parentElement.innerHTML='💠'">
+                        </label>
+                    </div>
+                    <div class="icon-option">
+                        <input type="radio" name="model_icon" id="icon_spark" value="spark">
+                        <label class="icon-label" for="icon_spark">
+                            <img src="/assets/icons/spark_logo.svg" alt="Spark" onerror="this.parentElement.innerHTML='⚡'">
+                        </label>
+                    </div>
+                    <label class="upload-button" for="icon-upload-input">
+                        <span>+</span>
+                        <span>上传</span>
+                    </label>
+                    <input type="file" id="icon-upload-input" accept="image/*">
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="modal-actions">
+                <button class="action-button button-cancel" id="cancel-btn">取消</button>
+                <button class="action-button button-delete" id="delete-btn" style="display: none;">删除模型</button>
+                <button class="action-button button-save" id="save-btn">保存模型</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // Model Manager - JavaScript
+        // ========================================
+
+        const modal = document.getElementById('model-modal');
+        const openModalBtn = document.getElementById('open-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const saveBtn = document.getElementById('save-btn');
+        const deleteBtn = document.getElementById('delete-btn');
+        const themeToggle = document.getElementById('theme-toggle');
+
+        let isEditMode = false;
+        let editingModelId = null;
+
+        // Theme Toggle
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const icon = themeToggle.querySelector('.theme-icon');
+            icon.textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
+        });
+
+        // Open Modal
+        openModalBtn.addEventListener('click', () => {
+            isEditMode = false;
+            editingModelId = null;
+            document.getElementById('modal-title-text').textContent = '添加新模型';
+            deleteBtn.style.display = 'none';
+            resetForm();
+            modal.classList.add('active');
+        });
+
+        // Close Modal
+        function closeModal() {
+            modal.classList.remove('active');
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+
+        // API Type Change Handler
+        const apiTypeInputs = document.querySelectorAll('input[name="api_type"]');
+        const fieldBaseUrl = document.getElementById('field-base-url');
+        const fieldFullUrl = document.getElementById('field-full-url');
+        const fieldSystemPrompt = document.getElementById('field-system-prompt');
+
+        function updateDynamicFields() {
+            const selectedType = document.querySelector('input[name="api_type"]:checked').value;
+
+            // Reset all fields
+            fieldBaseUrl.classList.remove('visible');
+            fieldFullUrl.classList.remove('visible');
+            fieldSystemPrompt.classList.remove('visible');
+
+            // Show relevant fields based on API type
+            switch (selectedType) {
+                case 'openai':
+                    fieldBaseUrl.classList.add('visible');
+                    fieldSystemPrompt.classList.add('visible');
+                    break;
+                case 'google':
+                    // Google only needs basic config
+                    break;
+                case 'requests_sse':
+                    fieldFullUrl.classList.add('visible');
+                    break;
+                case 'spark_requests':
+                    fieldFullUrl.classList.add('visible');
+                    break;
+            }
+        }
+
+        apiTypeInputs.forEach(input => {
+            input.addEventListener('change', updateDynamicFields);
+        });
+
+        // Initialize field visibility
+        updateDynamicFields();
+
+        // Form Validation
+        function validateForm() {
+            let isValid = true;
+            const selectedType = document.querySelector('input[name="api_type"]:checked').value;
+
+            // Required fields
+            const requiredFields = [
+                { id: 'model-id', message: '请输入模型 ID' },
+                { id: 'model-name', message: '请输入模型名称' },
+                { id: 'model-identifier', message: '请输入模型标识' },
+                { id: 'api-key-name', message: '请输入 API Key 环境变量名' }
+            ];
+
+            requiredFields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    input.classList.add('error');
+                    isValid = false;
+                } else {
+                    input.classList.remove('error');
+                }
+            });
+
+            // Type-specific validation
+            if (selectedType === 'openai') {
+                const baseUrl = document.getElementById('base-url');
+                if (!baseUrl.value.trim()) {
+                    baseUrl.classList.add('error');
+                    isValid = false;
+                } else {
+                    baseUrl.classList.remove('error');
+                }
+            } else if (selectedType === 'requests_sse' || selectedType === 'spark_requests') {
+                const fullUrl = document.getElementById('full-url');
+                if (!fullUrl.value.trim()) {
+                    fullUrl.classList.add('error');
+                    isValid = false;
+                } else {
+                    fullUrl.classList.remove('error');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Clear error on input
+        document.querySelectorAll('.form-input, .form-select').forEach(input => {
+            input.addEventListener('input', () => {
+                input.classList.remove('error');
+            });
+        });
+
+        // Icon Upload Handler
+        const iconUploadInput = document.getElementById('icon-upload-input');
+        iconUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    // Create a new icon option
+                    const iconSelector = document.querySelector('.icon-selector');
+                    const uploadBtn = iconSelector.querySelector('.upload-button');
+
+                    const newOption = document.createElement('div');
+                    newOption.className = 'icon-option';
+                    newOption.innerHTML = `
+                        <input type="radio" name="model_icon" id="icon_custom" value="custom" checked>
+                        <label class="icon-label" for="icon_custom">
+                            <img src="${event.target.result}" alt="Custom">
+                        </label>
+                    `;
+
+                    iconSelector.insertBefore(newOption, uploadBtn);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Save Model
+        saveBtn.addEventListener('click', async () => {
+            if (!validateForm()) return;
+
+            const modelData = {
+                id: document.getElementById('model-id').value.trim(),
+                name: document.getElementById('model-name').value.trim(),
+                type: document.querySelector('input[name="api_type"]:checked').value,
+                model: document.getElementById('model-identifier').value.trim(),
+                api_key_name: document.getElementById('api-key-name').value.trim().toUpperCase(),
+                icon: document.querySelector('input[name="model_icon"]:checked')?.value || 'openai'
+            };
+
+            // Add optional fields
+            const baseUrl = document.getElementById('base-url').value.trim();
+            if (baseUrl) modelData.base_url = baseUrl;
+
+            const fullUrl = document.getElementById('full-url').value.trim();
+            if (fullUrl) modelData.url = fullUrl;
+
+            const systemPrompt = document.getElementById('system-prompt').value.trim();
+            if (systemPrompt) modelData.system = systemPrompt;
+
+            try {
+                // In real implementation, send to API
+                console.log('Saving model:', modelData);
+
+                // TODO: Implement API call
+                // await fetch('/api/models', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(modelData)
+                // });
+
+                closeModal();
+                alert('模型保存成功！（演示模式）');
+            } catch (error) {
+                console.error('Error saving model:', error);
+                alert('保存失败：' + error.message);
+            }
+        });
+
+        // Delete Model
+        deleteBtn.addEventListener('click', async () => {
+            if (!editingModelId) return;
+
+            if (confirm(`确定要删除模型 "${editingModelId}" 吗？`)) {
+                try {
+                    // TODO: Implement API call
+                    // await fetch(`/api/models/${editingModelId}`, {
+                    //     method: 'DELETE'
+                    // });
+
+                    closeModal();
+                    alert('模型已删除！（演示模式）');
+                } catch (error) {
+                    console.error('Error deleting model:', error);
+                    alert('删除失败：' + error.message);
+                }
+            }
+        });
+
+        // Reset Form
+        function resetForm() {
+            document.getElementById('model-id').value = '';
+            document.getElementById('model-name').value = '';
+            document.getElementById('model-identifier').value = '';
+            document.getElementById('api-key-name').value = '';
+            document.getElementById('base-url').value = '';
+            document.getElementById('full-url').value = '';
+            document.getElementById('system-prompt').value = '';
+            document.getElementById('type_openai').checked = true;
+            document.getElementById('icon_openai').checked = true;
+
+            // Clear errors
+            document.querySelectorAll('.form-input, .form-select').forEach(el => {
+                el.classList.remove('error');
+            });
+
+            updateDynamicFields();
+        }
+
+        // Edit Mode (for future use)
+        function editModel(modelId) {
+            isEditMode = true;
+            editingModelId = modelId;
+            document.getElementById('modal-title-text').textContent = '编辑模型';
+            deleteBtn.style.display = 'block';
+
+            // TODO: Load model data from API
+            // fetch(`/api/models/${modelId}`)
+            //     .then(res => res.json())
+            //     .then(data => {
+            //         // Populate form
+            //     });
+
+            modal.classList.add('active');
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && modal.classList.contains('active')) {
+                saveBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

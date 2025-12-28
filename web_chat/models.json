@@ -1,0 +1,90 @@
+{
+  "version": "1.0.0",
+  "models": [
+    {
+      "id": "google",
+      "name": "Google Gemini",
+      "type": "google",
+      "model": "gemini-2.5-flash",
+      "api_key_name": "GOOGLE_API_KEY",
+      "icon": "gemini_logo.svg",
+      "enabled": true
+    },
+    {
+      "id": "deepseek",
+      "name": "DeepSeek",
+      "type": "openai",
+      "base_url": "https://api.deepseek.com/v1",
+      "model": "deepseek-chat",
+      "api_key_name": "DEEPSEEK_API_KEY",
+      "system": "You are a helpful assistant",
+      "icon": "deepseek_logo.svg",
+      "enabled": true
+    },
+    {
+      "id": "moonshot",
+      "name": "Moonshot/Kimi",
+      "type": "openai",
+      "base_url": "https://api.moonshot.cn/v1",
+      "model": "kimi-k2-turbo-preview",
+      "api_key_name": "MOONSHOT_API_KEY",
+      "system": "你是一只猫娘，你每回答一次问题都会在最后面加一个：,喵~",
+      "icon": "kimi_logo.svg",
+      "enabled": true
+    },
+    {
+      "id": "qwen",
+      "name": "Qwen",
+      "type": "requests_sse",
+      "url": "https://api.siliconflow.cn/v1/chat/completions",
+      "model": "Qwen/Qwen2.5-VL-72B-Instruct",
+      "api_key_name": "QWEN_API_KEY",
+      "icon": "qwen_logo.svg",
+      "enabled": true
+    },
+    {
+      "id": "spark",
+      "name": "Spark",
+      "type": "spark_requests",
+      "url": "https://spark-api-open.xf-yun.com/v2/chat/completions",
+      "model": "x1",
+      "api_key_name": "SPARK_API_KEY",
+      "icon": "spark_logo.svg",
+      "enabled": true
+    }
+  ],
+  "api_types": {
+    "google": {
+      "name": "Google Gemini",
+      "description": "使用 Google GenAI SDK",
+      "requires": ["api_key", "model"],
+      "optional": [],
+      "supports_system_prompt": false,
+      "supports_history": true
+    },
+    "openai": {
+      "name": "OpenAI 兼容",
+      "description": "使用 OpenAI SDK 或兼容接口",
+      "requires": ["api_key", "base_url", "model"],
+      "optional": ["system"],
+      "supports_system_prompt": true,
+      "supports_history": true
+    },
+    "requests_sse": {
+      "name": "HTTP + SSE",
+      "description": "通用 HTTP 流式接口",
+      "requires": ["api_key", "url", "model"],
+      "optional": [],
+      "supports_system_prompt": false,
+      "supports_history": true
+    },
+    "spark_requests": {
+      "name": "Spark 特殊格式",
+      "description": "讯飞星火 API 格式",
+      "requires": ["api_key", "url", "model"],
+      "optional": [],
+      "supports_system_prompt": false,
+      "supports_history": false
+    }
+  }
+}
