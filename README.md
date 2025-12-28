@@ -159,6 +159,8 @@ python web_chat/app.py
 | **Qwen (通义千问)** | [siliconflow.cn](https://siliconflow.cn/account/ak) | 需注册账号 |
 | **Spark (讯飞星火)** | [xfyun.cn](https://console.xfyun.cn/services/cbm) | 需注册账号 |
 
+> 📖 **详细申请步骤**：查看 [API Key 申请指南](docs/API_KEY_GUIDE.md) 了解每个平台的具体申请流程、费用说明和常见问题。
+
 ### 前端配置说明
 
 应用启动后，通过前端界面配置 API 密钥：
@@ -258,11 +260,10 @@ AI-Chat/
 │   ├── templates/
 │   │   └── index.html          # 前端单页应用
 │   ├── assets/
-│   │   └── icons/              # 模型图标资源
-│   └── CLAUDE.md               # 模块文档
+│        └── icons/              # 模型图标资源     
+│   
 ├── .gitignore                  # Git 忽略规则
 ├── requirements.txt            # Python 依赖
-├── CLAUDE.md                   # 根级 AI 上下文文档
 └── README.md                   # 本文档
 ```
 
