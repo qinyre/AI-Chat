@@ -87,8 +87,10 @@ Thumbs.db
 # 项目特定
 # ====================
 .spec-workflow/
-.claude/archive/
-.claude/approvals/
-.CLAUDE.md
+.claude/
+.claude/**
+CLAUDE.md
 web_chat/CLAUDE.md
+.mcp
+.mcp.json
 # 工作流和 AI 临时文件
