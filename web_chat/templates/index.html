@@ -978,6 +978,326 @@
             color: var(--accent-cyan);
         }
 
+        /* ==================== API 配置模态框样式 ==================== */
+
+        /* 设置按钮 */
+        .settings-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .settings-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .settings-btn:hover::before {
+            opacity: 0.1;
+        }
+
+        .settings-btn:hover {
+            border-color: var(--accent-cyan);
+            transform: rotate(45deg);
+        }
+
+        .settings-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .settings-btn:hover svg {
+            color: var(--accent-cyan);
+        }
+
+        /* API 配置模态框 */
+        .api-config-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(12px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 24px;
+        }
+
+        .api-config-overlay.active {
+            display: flex;
+            animation: modal-appear 0.3s ease;
+        }
+
+        .api-config-modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            animation: modal-slide 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 模态框头部 */
+        .api-config-header {
+            padding: 32px 36px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg, var(--bg-tertiary), var(--bg-secondary));
+        }
+
+        .api-config-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .api-config-title svg {
+            width: 28px;
+            height: 28px;
+            color: var(--accent-cyan);
+        }
+
+        /* 模态框内容区 */
+        .api-config-body {
+            padding: 32px 36px;
+            overflow-y: auto;
+            max-height: calc(85vh - 180px);
+        }
+
+        .api-config-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .api-config-body::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .api-config-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        /* API 配置项 */
+        .api-config-item {
+            margin-bottom: 24px;
+            animation: item-appear 0.4s ease backwards;
+        }
+
+        .api-config-item:nth-child(1) { animation-delay: 0.05s; }
+        .api-config-item:nth-child(2) { animation-delay: 0.1s; }
+        .api-config-item:nth-child(3) { animation-delay: 0.15s; }
+        .api-config-item:nth-child(4) { animation-delay: 0.2s; }
+        .api-config-item:nth-child(5) { animation-delay: 0.25s; }
+
+        @keyframes item-appear {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .api-config-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .api-config-name {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .api-config-model-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .api-config-model-icon svg {
+            width: 18px;
+            height: 18px;
+            color: #fff;
+        }
+
+        .api-config-status {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .api-config-status.configured {
+            background: rgba(0, 255, 170, 0.15);
+            color: var(--accent-cyan);
+        }
+
+        .api-config-status.unconfigured {
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+        }
+
+        .api-config-status .status-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .api-config-status.configured .status-indicator {
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        /* API 密钥输入框 */
+        .api-key-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .api-key-input {
+            width: 100%;
+            padding: 14px 50px 14px 16px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .api-key-input::placeholder {
+            color: var(--text-tertiary);
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .api-key-input:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 4px var(--glow-cyan);
+            background: var(--bg-secondary);
+        }
+
+        .api-key-input:not(:placeholder-shown) {
+            border-color: var(--accent-cyan);
+        }
+
+        /* 显示/隐藏密码按钮 */
+        .api-key-toggle {
+            position: absolute;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-tertiary);
+            transition: all 0.2s ease;
+        }
+
+        .api-key-toggle:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-cyan);
+        }
+
+        .api-key-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* 模态框底部 */
+        .api-config-footer {
+            padding: 24px 36px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: linear-gradient(0deg, var(--bg-tertiary), var(--bg-secondary));
+        }
+
+        .api-config-btn {
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .api-config-btn.secondary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .api-config-btn.secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-tertiary);
+        }
+
+        .api-config-btn.primary {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+            border: none;
+            color: #000;
+        }
+
+        .api-config-btn.primary:hover {
+            box-shadow: 0 8px 30px var(--glow-cyan);
+            transform: translateY(-2px);
+        }
+
+        .api-config-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .app-container {
@@ -1000,6 +1320,17 @@
                 inset: 0;
                 z-index: 100;
             }
+
+            .api-config-modal {
+                max-height: 90vh;
+            }
+
+            .api-config-header,
+            .api-config-body,
+            .api-config-footer {
+                padding-left: 24px;
+                padding-right: 24px;
+            }
         }
     </style>
 </head>
@@ -1020,6 +1351,12 @@
                         <span class="logo-subtitle">多模型智能平台</span>
                     </div>
                 </div>
+                <button class="settings-btn" id="api-config-btn" title="API 密钥配置">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                </button>
             </div>
 
             <div class="model-section">
@@ -1278,6 +1615,43 @@
         </div>
     </div>
 
+    <!-- API 配置模态框 -->
+    <div class="api-config-overlay" id="api-config-modal">
+        <div class="api-config-modal">
+            <div class="api-config-header">
+                <h2 class="api-config-title">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    API 密钥配置
+                </h2>
+                <button class="modal-close" id="close-api-config">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="api-config-body" id="api-config-list">
+                <!-- API 配置项由 JS 动态生成 -->
+            </div>
+            <div class="api-config-footer">
+                <button class="api-config-btn secondary" id="cancel-api-config">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    取消
+                </button>
+                <button class="api-config-btn primary" id="save-api-config">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    保存配置
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State
         let currentModel = null;
@@ -1507,7 +1881,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         model: currentModel,
-                        messages: modelHistories[currentModel]
+                        messages: modelHistories[currentModel],
+                        api_keys: await getStoredApiKeys()  // 发送前端存储的 API 密钥
                     })
                 });
 
@@ -1600,6 +1975,319 @@
 
             return content;
         }
+
+        // ==================== API 密钥配置管理 ====================
+
+        const API_CONFIG_STORAGE_KEY = 'ai_nexus_api_keys';
+
+        // 模型配置映射
+        const apiModelConfigs = {
+            'google': {
+                name: 'Google Gemini',
+                iconClass: 'gemini',
+                placeholder: 'AIzaSy...',
+                keyName: 'GOOGLE_API_KEY'
+            },
+            'deepseek': {
+                name: 'DeepSeek',
+                iconClass: 'deepseek',
+                placeholder: 'sk-...',
+                keyName: 'DEEPSEEK_API_KEY'
+            },
+            'moonshot': {
+                name: 'Moonshot/Kimi',
+                iconClass: 'kimi',
+                placeholder: 'sk-...',
+                keyName: 'MOONSHOT_API_KEY'
+            },
+            'qwen': {
+                name: 'Qwen (通义千问)',
+                iconClass: 'qwen',
+                placeholder: 'sk-...',
+                keyName: 'QWEN_API_KEY'
+            },
+            'spark': {
+                name: 'Spark (讯飞星火)',
+                iconClass: 'spark',
+                placeholder: 'Bearer...',
+                keyName: 'SPARK_API_KEY'
+            }
+        };
+
+        // 从后端 API 加载 API 密钥
+        async function loadApiKeys() {
+            try {
+                const response = await fetch('/api/config/load');
+                if (response.ok) {
+                    return await response.json();
+                }
+            } catch (e) {
+                console.error('Failed to load API keys:', e);
+            }
+            return {};
+        }
+
+        // 保存 API 密钥到后端
+        async function saveApiKeys(apiKeys) {
+            try {
+                const response = await fetch('/api/config/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(apiKeys)
+                });
+                return response.ok;
+            } catch (e) {
+                console.error('Failed to save API keys:', e);
+                return false;
+            }
+        }
+
+        // 获取当前存储的 API 密钥
+        async function getStoredApiKeys() {
+            return await loadApiKeys();
+        }
+
+        // 生成 API 配置模态框内容
+        async function renderApiConfigModal() {
+            const container = document.getElementById('api-config-list');
+            const storedKeys = await loadApiKeys();
+
+            container.innerHTML = Object.entries(apiModelConfigs).map(([modelId, config]) => {
+                const hasKey = storedKeys[config.keyName] && storedKeys[config.keyName].length > 0;
+                const maskedKey = hasKey ? '•'.repeat(Math.min(storedKeys[config.keyName].length, 32)) : '';
+
+                return `
+                    <div class="api-config-item" data-model="${modelId}">
+                        <div class="api-config-label">
+                            <div class="api-config-name">
+                                <div class="api-config-model-icon ${config.iconClass}">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/>
+                                    </svg>
+                                </div>
+                                <span>${config.name}</span>
+                            </div>
+                            <div class="api-config-status ${hasKey ? 'configured' : 'unconfigured'}">
+                                <span class="status-indicator"></span>
+                                ${hasKey ? '已配置' : '未配置'}
+                            </div>
+                        </div>
+                        <div class="api-key-input-wrapper">
+                            <input
+                                type="password"
+                                class="api-key-input"
+                                data-key="${config.keyName}"
+                                placeholder="${config.placeholder}"
+                                value="${maskedKey}"
+                                data-actual-value="${hasKey ? storedKeys[config.keyName] : ''}"
+                            >
+                            <button class="api-key-toggle" type="button" title="显示/隐藏">
+                                <svg class="eye-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <svg class="eye-off-icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="display: none;">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // 绑定事件
+            bindApiConfigEvents();
+        }
+
+        // 绑定 API 配置模态框事件
+        function bindApiConfigEvents() {
+            // 显示/隐藏密码
+            document.querySelectorAll('.api-key-toggle').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = this.parentElement.querySelector('.api-key-input');
+                    const eyeIcon = this.querySelector('.eye-icon');
+                    const eyeOffIcon = this.querySelector('.eye-off-icon');
+
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        eyeIcon.style.display = 'none';
+                        eyeOffIcon.style.display = 'block';
+                        // 显示实际值
+                        input.value = input.dataset.actualValue || '';
+                    } else {
+                        input.type = 'password';
+                        eyeIcon.style.display = 'block';
+                        eyeOffIcon.style.display = 'none';
+                        // 显示掩码值
+                        if (input.dataset.actualValue) {
+                            input.value = '•'.repeat(Math.min(input.dataset.actualValue.length, 32));
+                        }
+                    }
+                });
+            });
+
+            // 输入时更新实际值
+            document.querySelectorAll('.api-key-input').forEach(input => {
+                input.addEventListener('input', function() {
+                    if (this.type === 'text') {
+                        this.dataset.actualValue = this.value;
+                    }
+                });
+
+                input.addEventListener('blur', function() {
+                    if (this.type === 'text' && this.dataset.actualValue) {
+                        this.type = 'password';
+                        this.value = '•'.repeat(Math.min(this.dataset.actualValue.length, 32));
+                        const eyeIcon = this.parentElement.querySelector('.eye-icon');
+                        const eyeOffIcon = this.parentElement.querySelector('.eye-off-icon');
+                        eyeIcon.style.display = 'block';
+                        eyeOffIcon.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // 打开 API 配置模态框
+        function openApiConfigModal() {
+            renderApiConfigModal();
+            document.getElementById('api-config-modal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // 关闭 API 配置模态框
+        function closeApiConfigModal() {
+            document.getElementById('api-config-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // 保存 API 配置
+        async function saveApiConfig() {
+            const inputs = document.querySelectorAll('.api-key-input');
+            const apiKeys = {};
+
+            inputs.forEach(input => {
+                const keyName = input.dataset.key;
+                const actualValue = input.dataset.actualValue || '';
+                if (actualValue.trim()) {
+                    apiKeys[keyName] = actualValue.trim();
+                }
+            });
+
+            if (await saveApiKeys(apiKeys)) {
+                // 刷新可用模型列表
+                refreshModelList();
+                closeApiConfigModal();
+
+                // 显示成功提示
+                showNotification('API 密钥配置已保存', 'success');
+            } else {
+                showNotification('保存失败，请重试', 'error');
+            }
+        }
+
+        // 刷新模型列表
+        function refreshModelList() {
+            fetch('/api/models')
+                .then(r => r.json())
+                .then(models => {
+                    const list = document.getElementById('model-list');
+                    list.innerHTML = '';
+                    models.forEach(m => {
+                        if (!modelHistories[m]) {
+                            modelHistories[m] = [];
+                        }
+
+                        const iconClass = getModelIconClass(m);
+                        const iconKey = getModelIconKey(m);
+                        const iconSrc = modelIcons[iconKey] ? modelIcons[iconKey].src : '';
+
+                        const btn = document.createElement('button');
+                        btn.className = 'model-button';
+                        btn.innerHTML = `
+                            <div class="model-icon ${iconClass}">
+                                <img src="${iconSrc}" alt="${m}" style="width: 24px; height: 24px;">
+                            </div>
+                            <div class="model-info">
+                                <div class="model-name">${m}</div>
+                                <div class="model-status">
+                                    <span class="status-dot"></span>
+                                    <span>在线</span>
+                                </div>
+                            </div>
+                        `;
+                        btn.onclick = () => selectModel(m, btn);
+                        list.appendChild(btn);
+                    });
+
+                    // 如果当前没有选中模型或当前模型不在列表中，选中第一个
+                    if (!currentModel || !models.includes(currentModel)) {
+                        if (models.length > 0) {
+                            selectModel(models[0], list.firstChild);
+                        }
+                    }
+                });
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 24px;
+                right: 24px;
+                padding: 16px 24px;
+                background: ${type === 'success' ? 'rgba(0, 255, 170, 0.2)' : type === 'error' ? 'rgba(255, 107, 157, 0.2)' : 'rgba(78, 205, 196, 0.2)'};
+                border: 1px solid ${type === 'success' ? 'var(--accent-cyan)' : type === 'error' ? 'var(--accent-magenta)' : 'var(--accent-blue)'};
+                border-radius: 12px;
+                color: var(--text-primary);
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // 添加通知动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 绑定 API 配置按钮事件
+        document.getElementById('api-config-btn').addEventListener('click', openApiConfigModal);
+        document.getElementById('close-api-config').addEventListener('click', closeApiConfigModal);
+        document.getElementById('cancel-api-config').addEventListener('click', closeApiConfigModal);
+        document.getElementById('save-api-config').addEventListener('click', saveApiConfig);
+
+        // 点击遮罩层关闭模态框
+        document.getElementById('api-config-modal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeApiConfigModal();
+            }
+        });
+
+        // ESC 键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeApiConfigModal();
+            }
+        });
     </script>
 </body>
 

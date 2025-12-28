@@ -43,7 +43,7 @@
 - ⚡ **实时流式** - 基于 SSE 的流式响应，即时打字机体验
 - 💬 **独立对话** - 每个模型维护独立的对话历史
 - 🎨 **现代界面** - 玻璃拟态设计，支持深色/浅色主题
-- 🔒 **安全配置** - 环境变量管理，保护 API 密钥安全
+- 🔒 **安全配置** - 前端本地配置，密钥文件不提交版本控制
 
 ---
 
@@ -63,7 +63,7 @@
 ### 🔧 技术特性
 
 - ✅ **统一抽象层** - 通过 `LLMWrapper` 类统一不同 LLM 提供商的 API
-- ✅ **环境变量管理** - 使用 `python-dotenv` 安全管理 API 密钥
+- ✅ **本地配置存储** - API 密钥本地文件存储，前端可视化配置
 - ✅ **RESTful API** - 标准的 HTTP 接口设计
 - ✅ **流式传输** - Python 生成器 + Flask 流式响应
 - ✅ **无框架前端** - 原生 JavaScript，无额外依赖
@@ -135,35 +135,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 4️⃣ 配置环境变量
-
-```bash
-# 复制环境变量模板
-cp .env.example .env
-
-# 编辑 .env 文件，填入您的 API 密钥
-notepad .env  # Windows
-# 或
-nano .env     # macOS / Linux
-```
-
-在 `.env` 文件中填入您的 API 密钥：
-
-```bash
-GOOGLE_API_KEY=your_google_api_key_here
-DEEPSEEK_API_KEY=your_deepseek_api_key_here
-MOONSHOT_API_KEY=your_moonshot_api_key_here
-QWEN_API_KEY=your_qwen_api_key_here
-SPARK_API_KEY=your_spark_api_key_here
-```
-
-#### 5️⃣ 启动应用
+#### 4️⃣ 启动应用
 
 ```bash
 python web_chat/app.py
 ```
 
-#### 6️⃣ 访问应用
+#### 5️⃣ 访问应用
 
 打开浏览器访问：[http://127.0.0.1:5000](http://127.0.0.1:5000)
 
@@ -181,30 +159,26 @@ python web_chat/app.py
 | **Qwen (通义千问)** | [siliconflow.cn](https://siliconflow.cn/account/ak) | 需注册账号 |
 | **Spark (讯飞星火)** | [xfyun.cn](https://console.xfyun.cn/services/cbm) | 需注册账号 |
 
-### 环境变量说明
+### 前端配置说明
 
-完整的配置选项请参考 [`.env.example`](.env.example) 文件。
+应用启动后，通过前端界面配置 API 密钥：
 
-```bash
-# Google Gemini
-GOOGLE_API_KEY=your_api_key_here
+1. **打开配置界面**
+   - 点击左侧边栏的设置图标（⚙️）
 
-# DeepSeek
-DEEPSEEK_API_KEY=your_api_key_here
-DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+2. **输入 API 密钥**
+   - 在配置界面中填入各模型的 API 密钥
+   - 点击眼睛图标可显示/隐藏密钥
 
-# Moonshot / Kimi
-MOONSHOT_API_KEY=your_api_key_here
-MOONSHOT_BASE_URL=https://api.moonshot.cn/v1
+3. **保存配置**
+   - 点击"保存配置"按钮
+   - 密钥将保存到本地 `web_chat/api_keys.json` 文件
 
-# Qwen (通义千问)
-QWEN_API_KEY=your_api_key_here
-QWEN_BASE_URL=https://api.siliconflow.cn/v1/chat/completions
+4. **配置持久化**
+   - 下次启动应用时，配置会自动加载
+   - 无需重复输入 API 密钥
 
-# Spark (讯飞星火)
-SPARK_API_KEY=your_api_key_here
-SPARK_BASE_URL=https://spark-api-open.xf-yun.com/v2/chat/completions
-```
+> **注意**: `api_keys.json` 文件已加入 `.gitignore`，不会被提交到版本控制系统。
 
 ---
 
@@ -251,7 +225,7 @@ AI: Python 的主要特点包括...（基于上一轮对话的上下文）
 | **requests** | 2.31+ | HTTP 请求库 |
 | **OpenAI SDK** | 1.0+ | DeepSeek、Moonshot 集成 |
 | **Google GenAI** | 0.3+ | Gemini 集成 |
-| **python-dotenv** | 1.0+ | 环境变量管理 |
+| **python-dotenv** | 1.0+ | 环境变量管理（可选） |
 
 ### 前端
 
@@ -286,7 +260,6 @@ AI-Chat/
 │   ├── assets/
 │   │   └── icons/              # 模型图标资源
 │   └── CLAUDE.md               # 模块文档
-├── .env.example                # 环境变量模板
 ├── .gitignore                  # Git 忽略规则
 ├── requirements.txt            # Python 依赖
 ├── CLAUDE.md                   # 根级 AI 上下文文档
@@ -305,18 +278,15 @@ AI-Chat/
 
 ### 添加新的 LLM 提供商
 
-1. **在 `.env.example` 中添加配置**：
-   ```bash
-   NEW_PROVIDER_API_KEY=your_api_key_here
-   NEW_PROVIDER_BASE_URL=https://api.example.com/v1
-   ```
+1. **在前端配置界面添加 API 密钥**：
+   - 启动应用后，在设置界面添加新提供商的 API 密钥
 
 2. **在 `llm_wrapper.py` 中添加模型配置**：
    ```python
    "new_provider": {
        "type": "new_type",
-       "api_key": os.environ.get("NEW_PROVIDER_API_KEY", ""),
-       "base_url": os.environ.get("NEW_PROVIDER_BASE_URL", "https://api.example.com/v1"),
+       "api_key": custom_api_keys.get("NEW_PROVIDER_API_KEY", "") if custom_api_keys else "",
+       "base_url": "https://api.example.com/v1",
        "model": "model-name"
    }
    ```
@@ -388,8 +358,8 @@ pytest --cov=web_chat --cov-report=html
 ```python
 "deepseek": {
     "type": "openai",
-    "api_key": os.environ.get("DEEPSEEK_API_KEY", ""),
-    "base_url": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
+    "api_key": custom_api_keys.get("DEEPSEEK_API_KEY", "") if custom_api_keys else "",
+    "base_url": "https://api.deepseek.com/v1",
     "model": "deepseek-chat",
     "system": "You are a helpful assistant"  # 自定义系统提示词
 }
@@ -400,10 +370,10 @@ pytest --cov=web_chat --cov-report=html
 ### ❓ API 密钥安全吗？
 
 **答**: 项目采用最佳实践：
-- ✅ 使用环境变量存储 API 密钥
-- ✅ `.env` 文件已被 `.gitignore` 忽略
-- ✅ 提供 `.env.example` 作为配置模板
-- ✅ 永远不要将 `.env` 文件提交到 Git 仓库
+- ✅ API 密钥通过前端界面配置，存储在本地文件 `web_chat/api_keys.json`
+- ✅ `api_keys.json` 已被 `.gitignore` 忽略，不会被提交到 Git 仓库
+- ✅ 配置文件仅存储在用户本地，不与任何第三方服务共享
+- ✅ 支持显示/隐藏密钥，防止意外泄露
 
 ---
 

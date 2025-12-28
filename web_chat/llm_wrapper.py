@@ -10,24 +10,36 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class LLMWrapper:
-    def __init__(self):
+    def __init__(self, custom_api_keys=None):
+        """
+        初始化 LLM 包装器
+
+        Args:
+            custom_api_keys: 前端提供的自定义 API 密钥字典
+                            格式: {'GOOGLE_API_KEY': 'sk-...', 'DEEPSEEK_API_KEY': 'sk-...'}
+        """
+        self.custom_api_keys = custom_api_keys or {}
         # 从环境变量读取配置，提供安全的 API 密钥管理
-        self.configs = {
+        self.configs = self._load_configs()
+
+    def _load_configs(self):
+        """加载配置，优先使用前端提供的密钥"""
+        return {
             "google": {
                 "type": "google",
-                "api_key": os.environ.get("GOOGLE_API_KEY", ""),
+                "api_key": self.custom_api_keys.get('GOOGLE_API_KEY') or os.environ.get("GOOGLE_API_KEY", ""),
                 "model": "gemini-2.5-flash"
             },
             "deepseek": {
                 "type": "openai",
-                "api_key": os.environ.get("DEEPSEEK_API_KEY", ""),
+                "api_key": self.custom_api_keys.get('DEEPSEEK_API_KEY') or os.environ.get("DEEPSEEK_API_KEY", ""),
                 "base_url": os.environ.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1"),
                 "model": "deepseek-chat",
                 "system": "You are a helpful assistant"
             },
             "moonshot": {
                 "type": "openai",
-                "api_key": os.environ.get("MOONSHOT_API_KEY", ""),
+                "api_key": self.custom_api_keys.get('MOONSHOT_API_KEY') or os.environ.get("MOONSHOT_API_KEY", ""),
                 "base_url": os.environ.get("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1"),
                 "model": "kimi-k2-turbo-preview",
                 "system": "你是一只猫娘，你每回答一次问题都会在最后面加一个：,喵~"
@@ -35,13 +47,13 @@ class LLMWrapper:
             "qwen": {
                 "type": "requests_sse",
                 "url": os.environ.get("QWEN_BASE_URL", "https://api.siliconflow.cn/v1/chat/completions"),
-                "api_key": os.environ.get("QWEN_API_KEY", ""),
+                "api_key": self.custom_api_keys.get('QWEN_API_KEY') or os.environ.get("QWEN_API_KEY", ""),
                 "model": "Qwen/Qwen2.5-VL-72B-Instruct"
             },
             "spark": {
                 "type": "spark_requests",
                 "url": os.environ.get("SPARK_BASE_URL", "https://spark-api-open.xf-yun.com/v2/chat/completions"),
-                "api_key": os.environ.get("SPARK_API_KEY", ""),
+                "api_key": self.custom_api_keys.get('SPARK_API_KEY') or os.environ.get("SPARK_API_KEY", ""),
                 "model": "x1"
             }
         }
