@@ -267,6 +267,10 @@ AI-Chat/
 └── README.md                   # 本文档
 ```
 
+> **注**：完整的项目结构还包括：
+> - `docs/` - 项目文档目录，包含 [API Key 申请指南](docs/API_KEY_GUIDE.md)
+> - `web_chat/api_keys.json` - API 密钥本地存储文件（已加入 .gitignore）
+
 ### 核心文件说明
 
 - **`app.py`** - Flask 应用入口，定义路由和启动配置
