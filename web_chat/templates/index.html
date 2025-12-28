@@ -7,6 +7,17 @@
     <title>AI NEXUS | 多模型智能平台</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- Highlight.js 代码语法高亮 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- 支持更多语言 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -645,10 +656,40 @@
         }
 
         .prose pre code {
-            background: none;
+            background: transparent;
             padding: 0;
             font-size: 13px;
             line-height: 1.6;
+            display: block;
+            overflow-x: auto;
+        }
+
+        /* Highlight.js 代码块优化 */
+        .prose pre code.hljs {
+            background: transparent;
+        }
+
+        .hljs {
+            color: #e1e4e8;
+            background: transparent;
+        }
+
+        /* 代码块语言标签 */
+        .code-block-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 16px;
+            background: #0d1117;
+            border-bottom: 1px solid var(--border-color);
+            border-radius: 12px 12px 0 0;
+            margin-bottom: 0;
+        }
+
+        .code-block-header pre {
+            margin: 0;
+            border-radius: 0 0 12px 12px;
+            border-top: none;
         }
 
         .prose p {
@@ -1900,6 +1941,10 @@
                     const chunk = decoder.decode(value);
                     fullText += chunk;
                     contentDiv.innerHTML = marked.parse(fullText);
+                    // 代码语法高亮
+                    contentDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
                     chatContainer.scrollTop = chatContainer.scrollHeight;
                 }
 
@@ -1964,6 +2009,10 @@
                 content.textContent = text;
             } else {
                 content.innerHTML = text ? marked.parse(text) : '';
+                // 代码语法高亮
+                content.querySelectorAll('pre code').forEach((block) => {
+                    hljs.highlightElement(block);
+                });
             }
 
             div.appendChild(content);
