@@ -283,7 +283,7 @@
             stroke: currentColor;
         }
 
-        .model-icon.gemini { background: linear-gradient(135deg, #4285f4, #9b72cb); }
+        .model-icon.gemini { background: rgba(30, 30, 36, 0.95); border: 1px solid rgba(255, 255, 255, 0.1); }
         .model-icon.deepseek { background: linear-gradient(135deg, #6b7280, #1f2937); }
         .model-icon.kimi { background: linear-gradient(135deg, #ec4899, #8b5cf6); }
         .model-icon.qwen { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
@@ -1639,7 +1639,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                         </svg>
                     </button>
-                    <button class="help-btn" id="help-btn" title="API Key 申请指南">
+                    <button class="help-btn" id="help-btn-sidebar" title="API Key 申请指南">
                         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
                         </svg>
@@ -1678,7 +1678,7 @@
                     <span class="current-model-name" id="current-model-name">选择模型</span>
                 </div>
                 <div class="top-actions">
-                    <button class="action-button" id="help-btn">
+                    <button class="action-button" id="help-btn-top">
                         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
                         </svg>
@@ -1712,40 +1712,23 @@
                     <p class="welcome-subtitle">新一代多模型 AI 聚合平台，集成 Gemini、DeepSeek、Kimi、Qwen 和 Spark 五大智能引擎</p>
                     <div class="model-chips">
                         <div class="model-chip">
-                            <svg class="chip-icon" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#4285F4" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                            </svg>
+                            <img src="/assets/icons/gemini_logo.svg" class="chip-icon" style="width:20px;height:20px;" alt="Gemini">
                             Gemini
                         </div>
                         <div class="model-chip">
-                            <svg class="chip-icon" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="8" r="4" fill="#6B7280"/>
-                                <path fill="#6B7280" d="M12 14c-4.42 0-8 1.79-8 4v2h16v-2c0-2.21-3.58-4-8-4z"/>
-                                <circle cx="6" cy="6" r="2" fill="#9CA3AF" opacity="0.6"/>
-                                <circle cx="18" cy="6" r="2" fill="#9CA3AF" opacity="0.6"/>
-                            </svg>
+                            <img src="/assets/icons/deepseek_logo.svg" class="chip-icon" style="width:20px;height:20px;" alt="DeepSeek">
                             DeepSeek
                         </div>
                         <div class="model-chip">
-                            <svg class="chip-icon" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#EC4899" d="M12 2L6 7v10c0 5.55 3.84 10.74 6 12 2.16-1.26 6-6.45 6-12V7l-6-5zm0 2.5L16 8v8c0 4.33-2.39 8.27-4 9.69-1.61-1.42-4-5.36-4-9.69V8l4-3.5z"/>
-                                <circle cx="12" cy="10" r="2" fill="#8B5CF6"/>
-                            </svg>
+                            <img src="/assets/icons/kimi_logo.png" class="chip-icon" style="width:20px;height:20px;" alt="Kimi">
                             Kimi
                         </div>
                         <div class="model-chip">
-                            <svg class="chip-icon" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
-                                <circle cx="12" cy="12" r="9" fill="none" stroke="#6366F1" stroke-width="2"/>
-                                <circle cx="12" cy="12" r="3" fill="#6366F1"/>
-                                <circle cx="12" cy="12" r="1" fill="#fff"/>
-                            </svg>
+                            <img src="/assets/icons/qwen_logo.svg" class="chip-icon" style="width:20px;height:20px;" alt="Qwen">
                             Qwen
                         </div>
                         <div class="model-chip">
-                            <svg class="chip-icon" viewBox="0 0 24 24" style="width:16px;height:16px;" xmlns="http://www.w3.org/2000/svg">
-                                <path fill="#10B981" d="M12 2L9 9H2l6 4-2 7 6-4 6 4-2-7 6-4h-7L12 2z"/>
-                                <path fill="#34D399" d="M12 6l-1.5 3.5L7 11l3.5.5L12 15l1.5-3.5L17 11l-3.5-.5L12 6z" opacity="0.7"/>
-                            </svg>
+                            <img src="/assets/icons/spark_logo.svg" class="chip-icon" style="width:20px;height:20px;" alt="Spark">
                             Spark
                         </div>
                     </div>
@@ -1771,16 +1754,16 @@
 
     <!-- Help Modal -->
     <div class="modal-overlay" id="help-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">帮助中心</h2>
-                <button class="modal-close" id="close-modal">
+        <div class="help-modal">
+            <div class="help-header">
+                <h2 class="help-title">帮助中心</h2>
+                <button class="help-close" id="close-modal">
                     <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                     </svg>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="help-body">
                 <!-- Features Section -->
                 <div class="modal-section">
                     <h3 class="modal-section-title">功能特点</h3>
@@ -2210,7 +2193,8 @@
         const sendBtn = document.getElementById('send-btn');
         const clearBtn = document.getElementById('clear-btn');
         const themeBtn = document.getElementById('theme-btn');
-        const helpBtn = document.getElementById('help-btn');
+        const helpBtnSidebar = document.getElementById('help-btn-sidebar');
+        const helpBtnTop = document.getElementById('help-btn-top');
         const helpModal = document.getElementById('help-modal');
         const closeModal = document.getElementById('close-modal');
         const chatContainer = document.getElementById('chat-container');
@@ -2233,7 +2217,8 @@
         sendBtn.addEventListener('click', sendMessage);
         clearBtn.addEventListener('click', clearHistory);
         themeBtn.addEventListener('click', toggleTheme);
-        helpBtn.addEventListener('click', openModal);
+        helpBtnSidebar.addEventListener('click', openModal);
+        helpBtnTop.addEventListener('click', openModal);
         closeModal.addEventListener('click', closeModalFn);
 
         // Modal events
