@@ -1,0 +1,94 @@
+# AI NEXUS - Git 忽略文件配置
+# 此文件确保敏感信息和临时文件不会被提交到版本控制系统
+
+# ====================
+# 环境变量与敏感信息
+# ====================
+.env
+.env.local
+.env.*.local
+# 包含 API 密钥的配置文件
+
+# ====================
+# Python 相关
+# ====================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+# Python 字节码和编译文件
+
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+# Python 构建和分发文件
+
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+# 测试覆盖率文件
+
+# ====================
+# IDE 与编辑器
+# ====================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+# IDE 配置和临时文件
+
+# ====================
+# 浏览器与缓存
+# ====================
+playwright_profile/
+*.log
+# 浏览器配置和日志文件
+
+# ====================
+# 临时文件
+# ====================
+*.tmp
+*.bak
+*.cache
+.pytest_cache/
+# 临时和缓存文件
+
+# ====================
+# 操作系统
+# ====================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+# macOS 和 Windows 系统文件
+
+# ====================
+# 项目特定
+# ====================
+.spec-workflow/
+.claude/archive/
+.claude/approvals/
+.CLAUDE.md
+web_chat/CLAUDE.md
+# 工作流和 AI 临时文件

@@ -1,0 +1,34 @@
+# AI NEXUS - 多模型聊天平台依赖管理
+#
+# 安装方法:
+#   pip install -r requirements.txt
+#
+# 开发环境安装:
+#   pip install -r requirements.txt
+
+# ====================
+# Web 框架
+# ====================
+flask>=3.0.0,<4.0.0
+# 轻量级 Python Web 框架
+
+# ====================
+# HTTP 请求库
+# ====================
+requests>=2.31.0,<3.0.0
+# Python HTTP 库，用于 SSE 流式请求
+
+# ====================
+# LLM SDK
+# ====================
+openai>=1.0.0,<2.0.0
+# OpenAI Python SDK（兼容 DeepSeek, Moonshot 等）
+
+google-genai>=0.3.0,<1.0.0
+# Google Gemini SDK
+
+# ====================
+# 环境变量管理
+# ====================
+python-dotenv>=1.0.0,<2.0.0
+# 从 .env 文件加载环境变量
