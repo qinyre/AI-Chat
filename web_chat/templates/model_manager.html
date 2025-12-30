@@ -1356,14 +1356,11 @@
 
                         // Set icon
                         if (model.icon) {
-                            const iconRadio = document.querySelector(`input[name="icon-choice"][value="${model.icon}"]`);
+                            const iconRadio = document.querySelector(`input[name="model_icon"][value="${model.icon}"]`);
                             if (iconRadio) {
                                 iconRadio.checked = true;
-                            } else {
-                                // Custom icon
-                                document.getElementById('icon_upload').checked = true;
-                                document.getElementById('custom-icon-url').value = `/assets/icons/${model.icon}`;
                             }
+                            // 如果是自定义图标（不在预设列表中），保持默认选择
                         }
 
                         updateDynamicFields();
