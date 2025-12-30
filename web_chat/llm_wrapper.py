@@ -124,8 +124,19 @@ class LLMWrapper:
         # 合并配置（自定义模型可以覆盖默认模型）
         return {**default_configs, **custom_configs}
 
+    def _get_configs(self):
+        """
+        获取当前最新的模型配置
+        每次调用时重新加载，确保能获取到用户添加的新模型
+        """
+        return self._load_configs()
+
     def get_models(self):
-        return list(self.configs.keys())
+        """
+        获取可用的模型列表
+        每次调用时重新加载配置，确保返回最新的模型列表
+        """
+        return list(self._get_configs().keys())
 
     def chat_stream(self, model_id, messages):
         """
@@ -133,7 +144,8 @@ class LLMWrapper:
         messages: list of {"role": "user/assistant/system", "content": "..."}
         """
         print(f"Starting chat stream for {model_id}")
-        config = self.configs.get(model_id)
+        # 动态获取配置，确保使用最新的模型列表
+        config = self._get_configs().get(model_id)
         if not config:
             yield "Error: Unknown model"
             return
