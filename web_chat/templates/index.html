@@ -2298,6 +2298,7 @@
         let currentModel = null;
         let isSending = false;
         let modelHistories = {};
+        let modelInfoCache = {}; // 缓存模型信息（包括 icon）
 
         // Model icons configuration - Using local SVG files from assets/icons/
         const modelIcons = {
@@ -2341,6 +2342,12 @@
 
         // 获取模型图标 URL
         function getModelIconUrl(modelName) {
+            // 优先使用缓存的模型信息
+            if (modelInfoCache[modelName] && modelInfoCache[modelName].icon) {
+                return getIconSrc(modelInfoCache[modelName].icon, modelName);
+            }
+
+            // 回退到硬编码的默认映射
             const name = modelName.toLowerCase();
             if (name === 'google' || name.includes('gemini')) return '/assets/icons/gemini_logo.svg';
             if (name === 'deepseek' || name.includes('deepseek')) return '/assets/icons/deepseek_logo.svg';
@@ -2374,47 +2381,103 @@
 
         // 加载模型列表
         function loadModels() {
-            fetch('/api/models')
+            fetch('/api/models/list')
                 .then(r => r.json())
-                .then(models => {
+                .then(data => {
                     const list = document.getElementById('model-list');
                     list.innerHTML = '';
+
+                    if (!data.success || !data.models) {
+                        console.error('Failed to load models:', data);
+                        return;
+                    }
+
+                    const models = data.models;
                     models.forEach(m => {
-                        if (!modelHistories[m]) {
-                            modelHistories[m] = [];
+                        if (!m.enabled) return; // 跳过已禁用的模型
+
+                        // 缓存模型信息
+                        modelInfoCache[m.id] = m;
+
+                        if (!modelHistories[m.id]) {
+                            modelHistories[m.id] = [];
                         }
 
-                        const iconClass = getModelIconClass(m);
-                        const iconKey = getModelIconKey(m);
-                        const iconSrc = modelIcons[iconKey] ? modelIcons[iconKey].src : '';
+                        // 使用 API 返回的 icon 字段
+                        const iconSrc = getIconSrc(m.icon, m.id);
+                        const iconClass = getIconColorClass(m.id);
 
                         const btn = document.createElement('button');
                         btn.className = 'model-button';
                         btn.innerHTML = `
                             <div class="model-icon ${iconClass}">
-                                <img src="${iconSrc}" alt="${m}" style="width: 24px; height: 24px;">
+                                <img src="${iconSrc}" alt="${m.id}" style="width: 24px; height: 24px;">
                             </div>
                             <div class="model-info">
-                                <div class="model-name">${m}</div>
+                                <div class="model-name">${m.id}</div>
                                 <div class="model-status">
                                     <span class="status-dot"></span>
                                     <span>在线</span>
                                 </div>
                             </div>
                         `;
-                        btn.onclick = () => selectModel(m, btn);
+                        btn.onclick = () => selectModel(m.id, btn);
                         list.appendChild(btn);
                     });
-                    if (models.length > 0 && !list.querySelector('.selected')) {
+
+                    // 获取启用的模型ID列表
+                    const enabledModelIds = models.filter(m => m.enabled).map(m => m.id);
+
+                    if (enabledModelIds.length > 0 && !list.querySelector('.selected')) {
                         // 优先选择上次保存的模型，如果不存在则选择第一个
                         const savedModel = localStorage.getItem('currentModel');
-                        const modelToSelect = models.includes(savedModel) ? savedModel : models[0];
+                        const modelToSelect = enabledModelIds.includes(savedModel) ? savedModel : enabledModelIds[0];
                         const targetButton = Array.from(list.children).find(
                             btn => btn.querySelector('.model-name')?.textContent === modelToSelect
                         );
                         selectModel(modelToSelect, targetButton || list.firstChild);
                     }
+                })
+                .catch(err => {
+                    console.error('Error loading models:', err);
                 });
+        }
+
+        // 根据图标字段获取图标URL
+        function getIconSrc(iconField, modelId) {
+            if (!iconField) {
+                // 默认图标
+                return '/assets/icons/gemini_logo.svg';
+            }
+
+            // 如果是 data URL（自定义上传的 base64 图片）
+            if (iconField.startsWith('data:')) {
+                return iconField;
+            }
+
+            // 如果是完整 URL（http/https）
+            if (iconField.startsWith('http')) {
+                return iconField;
+            }
+
+            // 如果是本地文件名（包含扩展名）
+            if (iconField.includes('.')) {
+                return `/assets/icons/${iconField}`;
+            }
+
+            // 默认图标
+            return '/assets/icons/gemini_logo.svg';
+        }
+
+        // 获取图标颜色类（用于背景渐变）
+        function getIconColorClass(modelId) {
+            const name = modelId.toLowerCase();
+            if (name === 'google' || name.includes('gemini')) return 'gemini';
+            if (name === 'deepseek' || name.includes('deepseek')) return 'deepseek';
+            if (name === 'moonshot' || name === 'kimi' || name.includes('moonshot') || name.includes('kimi')) return 'kimi';
+            if (name === 'qwen' || name.includes('qwen') || name.includes('tongyi')) return 'qwen';
+            if (name === 'spark' || name.includes('spark') || name.includes('xinghuo')) return 'spark';
+            return 'gemini';
         }
 
         // 初始加载模型
