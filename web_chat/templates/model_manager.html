@@ -1174,12 +1174,33 @@
         let isEditMode = false;
         let editingModelId = null;
 
-        // Theme Toggle
-        themeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('light-theme');
+        // Theme Toggle - 同步 localStorage
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                document.body.classList.add('light-theme');
+            } else {
+                document.body.classList.remove('light-theme');
+            }
+            localStorage.setItem('theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function updateThemeIcon(theme) {
             const icon = themeToggle.querySelector('.theme-icon');
-            icon.textContent = document.body.classList.contains('light-theme') ? '☀️' : '🌙';
+            icon.textContent = theme === 'light' ? '☀️' : '🌙';
+        }
+
+        function getCurrentTheme() {
+            return document.body.classList.contains('light-theme') ? 'light' : 'dark';
+        }
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = getCurrentTheme();
+            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
+
+        // 初始化主题
+        applyTheme(localStorage.getItem('theme') || 'dark');
 
         // Open Modal
         openModalBtn.addEventListener('click', () => {
