@@ -107,6 +107,56 @@ def delete_model(model_id):
     return jsonify({"success": False, "message": "模型不存在"}), 404
 
 
+def update_model(model_id):
+    """更新模型配置"""
+    model_data = request.json
+    required_fields = ["name", "type", "model", "api_key_name"]
+    for field in required_fields:
+        if field not in model_data or not model_data[field]:
+            return jsonify({"success": False, "message": f"缺少必填字段: {field}"}), 400
+
+    data = load_models()
+    models = data.get("models", [])
+
+    # 查找并更新模型
+    for i, model in enumerate(models):
+        if model["id"] == model_id:
+            # 检查是否是内置模型
+            if model_id in ["google", "deepseek", "moonshot", "qwen", "spark"]:
+                return jsonify({"success": False, "message": "不能修改内置模型"}), 400
+
+            # 更新字段
+            models[i]["name"] = model_data["name"]
+            models[i]["type"] = model_data["type"]
+            models[i]["model"] = model_data["model"]
+            models[i]["api_key_name"] = model_data["api_key_name"].upper()
+            models[i]["icon"] = model_data.get("icon", "")
+
+            # 更新可选字段
+            if "base_url" in model_data:
+                models[i]["base_url"] = model_data["base_url"]
+            elif "base_url" in models[i]:
+                del models[i]["base_url"]
+
+            if "url" in model_data:
+                models[i]["url"] = model_data["url"]
+            elif "url" in models[i]:
+                del models[i]["url"]
+
+            if "system" in model_data:
+                models[i]["system"] = model_data["system"]
+            elif "system" in models[i]:
+                del models[i]["system"]
+
+            data["models"] = models
+            if save_models(data):
+                return jsonify({"success": True, "message": "模型更新成功", "model": models[i]})
+            else:
+                return jsonify({"success": False, "message": "保存失败"}), 500
+
+    return jsonify({"success": False, "message": "模型不存在"}), 404
+
+
 def get_model(model_id):
     """获取单个模型的详细信息"""
     data = load_models()
@@ -155,6 +205,10 @@ def register_routes(app):
     @app.route("/api/models/<model_id>", methods=["DELETE"])
     def api_delete_model(model_id):
         return delete_model(model_id)
+
+    @app.route("/api/models/<model_id>", methods=["PUT"])
+    def api_update_model(model_id):
+        return update_model(model_id)
 
     @app.route("/api/models/icon/upload", methods=["POST"])
     def api_upload_icon():

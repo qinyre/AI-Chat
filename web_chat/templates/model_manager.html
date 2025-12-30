@@ -1406,8 +1406,12 @@
                 // Save the model
                 console.log('Saving model:', modelData);
 
-                const response = await fetch('/api/models', {
-                    method: 'POST',
+                // 根据编辑模式选择不同的 API 端点和方法
+                const apiUrl = isEditMode ? `/api/models/${editingModelId}` : '/api/models';
+                const apiMethod = isEditMode ? 'PUT' : 'POST';
+
+                const response = await fetch(apiUrl, {
+                    method: apiMethod,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(modelData)
                 });
