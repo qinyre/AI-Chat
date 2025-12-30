@@ -198,6 +198,35 @@ python web_chat/app.py
 
 ### 高级功能
 
+#### 🎛️ 模型管理
+
+通过前端界面添加自定义 LLM 模型，无需修改代码：
+
+1. **打开模型管理**
+   - 点击左侧边栏的模型管理图标（📋）
+   - 在新打开的管理页面中进行操作
+
+2. **添加新模型**
+   - 点击"添加新模型"按钮
+   - 填写模型信息：
+     - **模型 ID**: 唯一标识符（如 `my-custom-model`）
+     - **模型名称**: 显示名称
+     - **API 类型**: 选择支持的协议类型
+     - **模型标识**: API 使用的模型名称
+     - **API 密钥变量名**: 环境变量名（如 `CUSTOM_API_KEY`）
+   - 根据选择的 API 类型填写可选字段
+   - 选择模型图标或上传自定义图标
+   - 点击"保存模型"
+
+3. **管理已有模型**
+   - 编辑模型配置
+   - 删除不需要的自定义模型（内置模型不可删除）
+
+> **注意**:
+> - 内置模型（Google Gemini、DeepSeek、Moonshot、Qwen、Spark）无法删除
+> - 添加的自定义模型保存在本地 `models.json`，不会被提交到 Git
+> - 每次添加模型后，需要先在 API 密钥配置中添加对应的密钥
+
 #### 切换主题
 
 点击右上角的主题图标切换深色/浅色模式：
@@ -261,70 +290,89 @@ AI-Chat/
 │   ├── app.py                  # Flask 应用入口
 │   ├── llm_wrapper.py          # LLM 抽象层核心
 │   ├── model_manager.py         # 模型管理模块
-│   ├── models.json              # 模型配置文件
+│   ├── models.json.example      # 模型配置模板（Git 追踪）
+│   ├── models.json              # 用户模型配置（本地，不追踪）
 │   ├── templates/
 │   │   ├── index.html          # 前端主页面
 │   │   └── model_manager.html  # 模型管理页面
 │   ├── assets/
-│        └── icons/              # 模型图标资源     
-│   
+│        └── icons/              # 模型图标资源
+│   └── api_keys.json            # API 密钥本地存储（不追踪）
+│
+├── docs/                       # 项目文档目录
+│   └── API_KEY_GUIDE.md        # API Key 申请指南
 ├── .gitignore                  # Git 忽略规则
 ├── requirements.txt            # Python 依赖
 └── README.md                   # 本文档
 ```
 
-> **注**：完整的项目结构还包括：
-> - `docs/` - 项目文档目录，包含 [API Key 申请指南](docs/API_KEY_GUIDE.md)
-> - `web_chat/api_keys.json` - API 密钥本地存储文件（已加入 .gitignore）
+> **说明**：
+> - `models.json.example` - 内置模型配置模板，首次运行时自动复制为 `models.json`
+> - `models.json` - 用户模型配置文件，包含内置模型和自定义模型，已加入 `.gitignore`
+> - `api_keys.json` - API 密钥本地存储文件，已加入 `.gitignore`
 
 ### 核心文件说明
 
 - **`app.py`** - Flask 应用入口，定义路由和启动配置
-- **`llm_wrapper.py`** - LLM 抽象层，统一不同提供商的 API
-- **`templates/index.html`** - 前端单页应用，包含所有 UI 和交互逻辑
+- **`llm_wrapper.py`** - LLM 抽象层，统一不同提供商的 API，支持动态模型加载
+- **`model_manager.py`** - 模型管理模块，提供模型的增删改查功能
+- **`templates/index.html`** - 前端主页面，聊天界面和 API 密钥配置
+- **`templates/model_manager.html`** - 模型管理页面，添加/编辑/删除自定义模型
 
 ---
 
 ## 开发指南
 
-### 添加新的 LLM 提供商
+### 添加自定义模型
 
-1. **在前端配置界面添加 API 密钥**：
-   - 启动应用后，在设置界面添加新提供商的 API 密钥
+**推荐方式：使用前端界面**
 
-2. **在 `llm_wrapper.py` 中添加模型配置**：
+通过前端模型管理界面添加自定义模型，无需修改代码：
+
+1. 打开模型管理页面（点击左侧边栏的模型管理图标）
+2. 填写模型配置信息
+3. 保存即可立即使用
+
+支持的 API 类型：
+- **Google Gemini** - 使用 Google GenAI SDK
+- **OpenAI 兼容** - 使用 OpenAI SDK 或兼容接口（支持系统提示词）
+- **HTTP + SSE** - 通用 HTTP 流式接口
+- **Spark 特殊格式** - 讯飞星火 API 格式
+
+### 开发新的 API 类型
+
+如果需要添加不支持的 API 类型，需要修改代码：
+
+1. **在 `llm_wrapper.py` 中实现新的聊天方法**：
    ```python
-   "new_provider": {
-       "type": "new_type",
-       "api_key": custom_api_keys.get("NEW_PROVIDER_API_KEY", "") if custom_api_keys else "",
-       "base_url": "https://api.example.com/v1",
-       "model": "model-name"
-   }
-   ```
-
-3. **实现 `_chat_provider()` 方法**：
-   ```python
-   def _chat_new_provider(self, config, messages):
-       # 实现流式聊天逻辑
+   def _chat_new_type(self, config, messages):
+       """实现新的 API 类型聊天逻辑"""
+       # 配置 API 参数
+       # 发送请求
+       # 流式返回响应
        for chunk in ...:
            yield chunk
    ```
 
-4. **在 `chat_stream()` 中添加路由**：
+2. **在 `chat_stream()` 中添加路由**：
    ```python
    elif config["type"] == "new_type":
-       yield from self._chat_new_provider(config, messages)
+       yield from self._chat_new_type(config, messages)
    ```
 
-5. **在前端 `index.html` 中添加图标映射**：
-   ```javascript
-   const modelIcons = {
-       'new_provider': {
-           src: '/assets/icons/new_provider_logo.svg',
-           class: 'new-provider'
-       }
-   };
+3. **在 `models.json.example` 的 `api_types` 中添加类型定义**：
+   ```json
+   "new_type": {
+       "name": "新 API 类型",
+       "description": "类型描述",
+       "requires": ["api_key", "model"],
+       "optional": ["base_url"],
+       "supports_system_prompt": false,
+       "supports_history": true
+   }
    ```
+
+4. **在 `model_manager.html` 中添加对应的表单字段**（如果需要特殊字段）
 
 ### 运行测试
 
@@ -343,6 +391,29 @@ pytest --cov=web_chat --cov-report=html
 
 ## 常见问题
 
+### ❓ 如何添加自定义模型？
+
+**答**: 通过前端模型管理界面添加，无需修改代码：
+
+1. 点击左侧边栏的模型管理图标（📋）
+2. 点击"添加新模型"按钮
+3. 填写模型配置信息
+4. 保存即可使用
+
+### ❓ 添加的模型会丢失吗？
+
+**答**: 不会。自定义模型保存在本地 `models.json` 文件中，会持久化保存。但注意：
+- 该文件已加入 `.gitignore`，不会被提交到 Git
+- 如果更换设备或重新克隆仓库，需要重新添加自定义模型
+- 建议定期备份 `models.json` 文件
+
+### ❓ 如何恢复初始模型配置？
+
+**答**: 删除 `web_chat/models.json` 文件，重启应用后会自动从 `models.json.example` 恢复初始配置。
+
+### ❓ 可以删除内置模型吗？
+
+**答**: 不可以。内置模型（Google Gemini、DeepSeek、Moonshot、Qwen、Spark）受保护，无法通过界面删除。如果不需要使用某个内置模型，可以在 API 密钥配置中不填写对应的密钥。
 
 ### ❓ 为什么 Spark 模型没有对话历史？
 
@@ -374,11 +445,19 @@ pytest --cov=web_chat --cov-report=html
 
 ### ❓ API 密钥安全吗？
 
-**答**: 项目采用最佳实践：
+**答**: 项目采用多层安全保护机制：
+
+**API 密钥保护**：
 - ✅ API 密钥通过前端界面配置，存储在本地文件 `web_chat/api_keys.json`
 - ✅ `api_keys.json` 已被 `.gitignore` 忽略，不会被提交到 Git 仓库
 - ✅ 配置文件仅存储在用户本地，不与任何第三方服务共享
 - ✅ 支持显示/隐藏密钥，防止意外泄露
+
+**自定义模型保护**：
+- ✅ 用户自定义模型配置保存在 `web_chat/models.json`
+- ✅ `models.json` 已被 `.gitignore` 忽略，不会被提交到 Git 仓库
+- ✅ 内置模型配置单独保存在 `models.json.example`（可安全提交）
+- ✅ 首次运行时自动从示例文件复制，确保用户有默认配置
 
 ---
 
