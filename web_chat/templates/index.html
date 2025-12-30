@@ -2367,38 +2367,54 @@
             return 'gemini';
         }
 
-        // Fetch Models
-        fetch('/api/models')
-            .then(r => r.json())
-            .then(models => {
-                const list = document.getElementById('model-list');
-                list.innerHTML = '';
-                models.forEach(m => {
-                    modelHistories[m] = [];
+        // 加载模型列表
+        function loadModels() {
+            fetch('/api/models')
+                .then(r => r.json())
+                .then(models => {
+                    const list = document.getElementById('model-list');
+                    list.innerHTML = '';
+                    models.forEach(m => {
+                        if (!modelHistories[m]) {
+                            modelHistories[m] = [];
+                        }
 
-                    const iconClass = getModelIconClass(m);
-                    const iconKey = getModelIconKey(m);
-                    const iconSrc = modelIcons[iconKey] ? modelIcons[iconKey].src : '';
+                        const iconClass = getModelIconClass(m);
+                        const iconKey = getModelIconKey(m);
+                        const iconSrc = modelIcons[iconKey] ? modelIcons[iconKey].src : '';
 
-                    const btn = document.createElement('button');
-                    btn.className = 'model-button';
-                    btn.innerHTML = `
-                        <div class="model-icon ${iconClass}">
-                            <img src="${iconSrc}" alt="${m}" style="width: 24px; height: 24px;">
-                        </div>
-                        <div class="model-info">
-                            <div class="model-name">${m}</div>
-                            <div class="model-status">
-                                <span class="status-dot"></span>
-                                <span>在线</span>
+                        const btn = document.createElement('button');
+                        btn.className = 'model-button';
+                        btn.innerHTML = `
+                            <div class="model-icon ${iconClass}">
+                                <img src="${iconSrc}" alt="${m}" style="width: 24px; height: 24px;">
                             </div>
-                        </div>
-                    `;
-                    btn.onclick = () => selectModel(m, btn);
-                    list.appendChild(btn);
+                            <div class="model-info">
+                                <div class="model-name">${m}</div>
+                                <div class="model-status">
+                                    <span class="status-dot"></span>
+                                    <span>在线</span>
+                                </div>
+                            </div>
+                        `;
+                        btn.onclick = () => selectModel(m, btn);
+                        list.appendChild(btn);
+                    });
+                    if (models.length > 0 && !list.querySelector('.selected')) {
+                        selectModel(models[0], list.firstChild);
+                    }
                 });
-                if (models.length > 0) selectModel(models[0], list.firstChild);
-            });
+        }
+
+        // 初始加载模型
+        loadModels();
+
+        // 当页面重新获得可见性时重新加载模型（从模型管理页面返回时）
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                loadModels();
+            }
+        });
 
         // Get icon key for model
         function getModelIconKey(modelName) {
@@ -2843,7 +2859,7 @@
 
             if (await saveApiKeys(apiKeys)) {
                 // 刷新可用模型列表
-                refreshModelList();
+                loadModels();
                 closeApiConfigModal();
 
                 // 显示成功提示
@@ -2851,49 +2867,6 @@
             } else {
                 showNotification('保存失败，请重试', 'error');
             }
-        }
-
-        // 刷新模型列表
-        function refreshModelList() {
-            fetch('/api/models')
-                .then(r => r.json())
-                .then(models => {
-                    const list = document.getElementById('model-list');
-                    list.innerHTML = '';
-                    models.forEach(m => {
-                        if (!modelHistories[m]) {
-                            modelHistories[m] = [];
-                        }
-
-                        const iconClass = getModelIconClass(m);
-                        const iconKey = getModelIconKey(m);
-                        const iconSrc = modelIcons[iconKey] ? modelIcons[iconKey].src : '';
-
-                        const btn = document.createElement('button');
-                        btn.className = 'model-button';
-                        btn.innerHTML = `
-                            <div class="model-icon ${iconClass}">
-                                <img src="${iconSrc}" alt="${m}" style="width: 24px; height: 24px;">
-                            </div>
-                            <div class="model-info">
-                                <div class="model-name">${m}</div>
-                                <div class="model-status">
-                                    <span class="status-dot"></span>
-                                    <span>在线</span>
-                                </div>
-                            </div>
-                        `;
-                        btn.onclick = () => selectModel(m, btn);
-                        list.appendChild(btn);
-                    });
-
-                    // 如果当前没有选中模型或当前模型不在列表中，选中第一个
-                    if (!currentModel || !models.includes(currentModel)) {
-                        if (models.length > 0) {
-                            selectModel(models[0], list.firstChild);
-                        }
-                    }
-                });
         }
 
         // 显示通知
