@@ -548,13 +548,14 @@
             font-family: 'Space Grotesk', sans-serif;
             font-size: 14px;
             font-weight: 600;
-            border: none;
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
         }
 
         .add-model-btn span {
@@ -564,6 +565,19 @@
         .add-model-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 20px var(--glow-cyan);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* 深色模式优化 */
+        [data-theme="dark"] .add-model-btn {
+            background: linear-gradient(135deg, #00ffaa, #6366f1);
+            color: #000;
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 10px rgba(0, 255, 170, 0.3);
+        }
+
+        [data-theme="dark"] .add-model-btn:hover {
+            box-shadow: 0 4px 25px rgba(0, 255, 170, 0.5);
         }
 
         /* Models container */
