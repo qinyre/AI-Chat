@@ -1106,31 +1106,31 @@
                 <div class="section-title">图标选择</div>
                 <div class="icon-selector">
                     <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_gemini" value="gemini">
+                        <input type="radio" name="model_icon" id="icon_gemini" value="gemini_logo.svg">
                         <label class="icon-label" for="icon_gemini">
                             <img src="/assets/icons/gemini_logo.svg" alt="Gemini" onerror="this.parentElement.innerHTML='🔶'">
                         </label>
                     </div>
                     <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_openai" value="openai" checked>
+                        <input type="radio" name="model_icon" id="icon_openai" value="deepseek_logo.svg" checked>
                         <label class="icon-label" for="icon_openai">
                             <img src="/assets/icons/deepseek_logo.svg" alt="OpenAI" onerror="this.parentElement.innerHTML='🔷'">
                         </label>
                     </div>
                     <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_kimi" value="kimi">
+                        <input type="radio" name="model_icon" id="icon_kimi" value="kimi_logo.svg">
                         <label class="icon-label" for="icon_kimi">
                             <img src="/assets/icons/kimi_logo.svg" alt="Kimi" onerror="this.parentElement.innerHTML='🌙'">
                         </label>
                     </div>
                     <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_qwen" value="qwen">
+                        <input type="radio" name="model_icon" id="icon_qwen" value="qwen_logo.svg">
                         <label class="icon-label" for="icon_qwen">
                             <img src="/assets/icons/qwen_logo.svg" alt="Qwen" onerror="this.parentElement.innerHTML='💠'">
                         </label>
                     </div>
                     <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_spark" value="spark">
+                        <input type="radio" name="model_icon" id="icon_spark" value="spark_logo.svg">
                         <label class="icon-label" for="icon_spark">
                             <img src="/assets/icons/spark_logo.svg" alt="Spark" onerror="this.parentElement.innerHTML='⚡'">
                         </label>
@@ -1340,18 +1340,26 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    // Create a new icon option
+                    // Create a new icon option with unique ID
                     const iconSelector = document.querySelector('.icon-selector');
                     const uploadBtn = iconSelector.querySelector('.upload-button');
+                    const customId = 'icon_custom_' + Date.now();
 
                     const newOption = document.createElement('div');
                     newOption.className = 'icon-option';
+                    // 将 data URL 作为 value 保存
                     newOption.innerHTML = `
-                        <input type="radio" name="model_icon" id="icon_custom" value="custom" checked>
-                        <label class="icon-label" for="icon_custom">
+                        <input type="radio" name="model_icon" id="${customId}" value="${event.target.result}" checked>
+                        <label class="icon-label" for="${customId}">
                             <img src="${event.target.result}" alt="Custom">
                         </label>
                     `;
+
+                    // 移除之前的自定义图标选项
+                    const prevCustom = iconSelector.querySelector('input[value^="data:image"]');
+                    if (prevCustom) {
+                        prevCustom.parentElement.remove();
+                    }
 
                     iconSelector.insertBefore(newOption, uploadBtn);
                 };
@@ -1553,11 +1561,33 @@
 
                         // Set icon
                         if (model.icon) {
-                            const iconRadio = document.querySelector(`input[name="model_icon"][value="${model.icon}"]`);
-                            if (iconRadio) {
-                                iconRadio.checked = true;
+                            // 检查是否是自定义图标（data URL）
+                            if (model.icon.startsWith('data:')) {
+                                // 移除之前的自定义图标
+                                const prevCustom = document.querySelector('input[value^="data:image"]')?.parentElement;
+                                if (prevCustom) prevCustom.remove();
+
+                                // 创建新的自定义图标选项
+                                const iconSelector = document.querySelector('.icon-selector');
+                                const uploadBtn = iconSelector.querySelector('.upload-button');
+                                const customId = 'icon_custom_' + Date.now();
+
+                                const newOption = document.createElement('div');
+                                newOption.className = 'icon-option';
+                                newOption.innerHTML = `
+                                    <input type="radio" name="model_icon" id="${customId}" value="${model.icon}" checked>
+                                    <label class="icon-label" for="${customId}">
+                                        <img src="${model.icon}" alt="Custom">
+                                    </label>
+                                `;
+                                iconSelector.insertBefore(newOption, uploadBtn);
+                            } else {
+                                // 预设图标
+                                const iconRadio = document.querySelector(`input[name="model_icon"][value="${model.icon}"]`);
+                                if (iconRadio) {
+                                    iconRadio.checked = true;
+                                }
                             }
-                            // 如果是自定义图标（不在预设列表中），保持默认选择
                         }
 
                         updateDynamicFields();
@@ -1658,9 +1688,26 @@
         }
 
         function getIconHtml(iconFile, modelName) {
-            if (iconFile && !iconFile.includes('custom')) {
-                return `<img src="/assets/icons/${iconFile}" alt="${modelName}" onerror="this.parentElement.innerHTML='🤖'">`;
+            if (!iconFile) {
+                return '🤖';
             }
+
+            // 如果是 data URL（base64编码的自定义图片）
+            if (iconFile.startsWith('data:')) {
+                return `<img src="${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+            }
+
+            // 如果是完整 URL（http/https）
+            if (iconFile.startsWith('http')) {
+                return `<img src="${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+            }
+
+            // 如果是本地文件名（包含扩展名）
+            if (iconFile.includes('.')) {
+                return `<img src="/assets/icons/${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+            }
+
+            // 默认返回机器人表情
             return '🤖';
         }
 
