@@ -761,8 +761,9 @@
 
         /* Input Area */
         .input-area {
-            padding: 24px 32px;
+            padding: 16px 32px 20px;
             border-top: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .input-container {
@@ -774,11 +775,11 @@
         .input-wrapper {
             display: flex;
             align-items: flex-end;
-            gap: 14px;
+            gap: 12px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 14px 18px;
+            border-radius: 14px;
+            padding: 10px 14px;
             transition: all 0.3s ease;
         }
 
@@ -805,9 +806,9 @@
         }
 
         .send-button {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
             border: none;
             cursor: pointer;
@@ -829,16 +830,54 @@
         }
 
         .send-button svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             color: #000;
         }
 
         .input-hint {
             text-align: center;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-tertiary);
-            margin-top: 12px;
+            margin-top: 10px;
+        }
+
+        /* Stop Button Mode */
+        .send-button.stop-mode {
+            background: linear-gradient(135deg, var(--accent-magenta), #ff6b6b);
+            box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+        }
+
+        .send-button.stop-mode:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 8px 30px rgba(255, 107, 157, 0.5);
+        }
+
+        .send-button.stop-mode svg {
+            color: #fff;
+        }
+
+        /* Stop Badge */
+        .stop-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            margin-left: 8px;
+            background: rgba(255, 107, 157, 0.15);
+            border: 1px solid var(--accent-magenta);
+            border-radius: 6px;
+            font-size: 11px;
+            color: var(--accent-magenta);
+            font-weight: 500;
+        }
+
+        .stop-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-magenta);
+            border-radius: 1px;
         }
 
         /* Typing Cursor */

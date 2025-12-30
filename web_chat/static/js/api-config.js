@@ -123,23 +123,35 @@ async function renderApiConfigModal() {
 function bindApiConfigEvents() {
     // 显示/隐藏密码
     document.querySelectorAll('.api-key-toggle').forEach(btn => {
-        btn.addEventListener('click', function () {
+        btn.addEventListener('click', function (e) {
+            // 阻止事件冒泡，避免触发 input 的 blur
+            e.preventDefault();
+
             const input = this.parentElement.querySelector('.api-key-input');
             const eyeIcon = this.querySelector('.eye-icon');
             const eyeOffIcon = this.querySelector('.eye-off-icon');
 
-            if (input.type === 'password') {
-                input.type = 'text';
-                eyeIcon.style.display = 'none';
-                eyeOffIcon.style.display = 'block';
-                input.value = input.dataset.actualValue || '';
-            } else {
+            // 确保 actualValue 是最新的
+            if (input.type === 'text') {
+                // 当前是显示状态，切换到隐藏
+                // 先保存当前值到 actualValue
+                if (input.value && !input.value.startsWith('•')) {
+                    input.dataset.actualValue = input.value;
+                }
                 input.type = 'password';
                 eyeIcon.style.display = 'block';
                 eyeOffIcon.style.display = 'none';
                 if (input.dataset.actualValue) {
                     input.value = '•'.repeat(Math.min(input.dataset.actualValue.length, 32));
                 }
+            } else {
+                // 当前是隐藏状态，切换到显示
+                input.type = 'text';
+                eyeIcon.style.display = 'none';
+                eyeOffIcon.style.display = 'block';
+                input.value = input.dataset.actualValue || '';
+                // 显示后自动聚焦，方便用户修改
+                input.focus();
             }
         });
     });
@@ -147,19 +159,27 @@ function bindApiConfigEvents() {
     // 输入时更新实际值
     document.querySelectorAll('.api-key-input').forEach(input => {
         input.addEventListener('input', function () {
+            // 只在可见状态下更新 actualValue
             if (this.type === 'text') {
                 this.dataset.actualValue = this.value;
             }
         });
 
         input.addEventListener('blur', function () {
+            // 失去焦点时，如果是可见状态且不是点击了 toggle 按钮，则自动隐藏
             if (this.type === 'text' && this.dataset.actualValue) {
-                this.type = 'password';
-                this.value = '•'.repeat(Math.min(this.dataset.actualValue.length, 32));
-                const eyeIcon = this.parentElement.querySelector('.eye-icon');
-                const eyeOffIcon = this.parentElement.querySelector('.eye-off-icon');
-                eyeIcon.style.display = 'block';
-                eyeOffIcon.style.display = 'none';
+                // 延迟执行，避免与 toggle 按钮的 click 冲突
+                setTimeout(() => {
+                    // 检查 input 是否仍然是 text 状态（说明用户没有点击 toggle）
+                    if (this.type === 'text') {
+                        this.type = 'password';
+                        this.value = '•'.repeat(Math.min(this.dataset.actualValue.length, 32));
+                        const eyeIcon = this.parentElement.querySelector('.eye-icon');
+                        const eyeOffIcon = this.parentElement.querySelector('.eye-off-icon');
+                        if (eyeIcon) eyeIcon.style.display = 'block';
+                        if (eyeOffIcon) eyeOffIcon.style.display = 'none';
+                    }
+                }, 200);
             }
         });
     });

@@ -6,6 +6,7 @@ window.appState = {
     isSending: false,
     modelHistories: {},
     modelInfoCache: {}, // 缓存模型信息（包括 icon）
+    abortController: null, // 用于中断 AI 输出
 };
 
 // 状态更新辅助函数

@@ -15,25 +15,68 @@ input.addEventListener('input', function () {
 input.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
-        sendMessage();
+        handleSendBtnClick();
     }
 });
+
+// 按钮点击事件处理（发送或中断）
+function handleSendBtnClick() {
+    if (window.appState.isSending) {
+        abortGeneration();
+    } else {
+        sendMessage();
+    }
+}
+
+// 中断 AI 生成
+function abortGeneration() {
+    if (window.appState.abortController) {
+        window.appState.abortController.abort();
+        window.appState.abortController = null;
+    }
+    window.appState.isSending = false;
+    updateSendButtonState(false);
+}
+
+// 更新发送按钮状态
+function updateSendButtonState(isSending) {
+    if (isSending) {
+        // 切换为中断按钮
+        sendBtn.classList.add('stop-mode');
+        sendBtn.innerHTML = `
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h12v12H6z" />
+            </svg>
+        `;
+        sendBtn.disabled = false;
+    } else {
+        // 恢复为发送按钮
+        sendBtn.classList.remove('stop-mode');
+        sendBtn.innerHTML = `
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+            </svg>
+        `;
+        sendBtn.disabled = false;
+    }
+}
 
 // 发送消息
 async function sendMessage() {
     if (window.appState.isSending) return;
     window.appState.isSending = true;
-    sendBtn.disabled = true;
+    updateSendButtonState(true);
 
     const text = input.value.trim();
     if (!text) {
         window.appState.isSending = false;
-        sendBtn.disabled = false;
+        updateSendButtonState(false);
         return;
     }
     if (!window.appState.currentModel) {
         window.appState.isSending = false;
-        sendBtn.disabled = false;
+        updateSendButtonState(false);
         return;
     }
 
@@ -52,6 +95,9 @@ async function sendMessage() {
     const contentDiv = aiMsgDiv;
     contentDiv.innerHTML = '<span class="typing-cursor"></span>';
 
+    // 创建 AbortController 用于中断请求
+    window.appState.abortController = new AbortController();
+
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -60,7 +106,8 @@ async function sendMessage() {
                 model: window.appState.currentModel,
                 messages: window.appState.getModelHistory(window.appState.currentModel),
                 api_keys: await getStoredApiKeys()
-            })
+            }),
+            signal: window.appState.abortController.signal
         });
 
         if (!response.ok) throw new Error('Network error: ' + response.statusText);
@@ -86,10 +133,28 @@ async function sendMessage() {
 
         window.appState.addMessageToHistory(window.appState.currentModel, 'assistant', fullText);
     } catch (err) {
-        contentDiv.innerHTML = `<span style="color: var(--accent-magenta);">Error: ${err.message}</span>`;
+        // 检查是否是用户主动中断
+        if (err.name === 'AbortError') {
+            // 保存已生成的部分内容
+            const partialText = contentDiv.textContent || '';
+            if (partialText) {
+                window.appState.addMessageToHistory(window.appState.currentModel, 'assistant', partialText);
+                // 添加中断标记
+                const stopBadge = document.createElement('span');
+                stopBadge.className = 'stop-badge';
+                stopBadge.textContent = ' [已中断]';
+                contentDiv.appendChild(stopBadge);
+            } else {
+                // 如果没有任何内容，移除消息
+                aiMsgDiv.remove();
+            }
+        } else {
+            contentDiv.innerHTML = `<span style="color: var(--accent-magenta);">Error: ${err.message}</span>`;
+        }
     } finally {
         window.appState.isSending = false;
-        sendBtn.disabled = false;
+        window.appState.abortController = null;
+        updateSendButtonState(false);
     }
 }
 
@@ -147,5 +212,5 @@ function clearHistory() {
 }
 
 // Button events
-sendBtn.addEventListener('click', sendMessage);
+sendBtn.addEventListener('click', handleSendBtnClick);
 document.getElementById('clear-btn').addEventListener('click', clearHistory);
