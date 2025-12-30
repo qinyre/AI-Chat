@@ -533,6 +533,36 @@
             border-bottom: 1px solid var(--border-color);
         }
 
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+        }
+
+        .back-btn:hover {
+            border-color: var(--accent-cyan);
+            transform: translateX(-2px);
+        }
+
+        .back-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
         .page-header h1 {
             font-family: 'Space Grotesk', sans-serif;
             font-size: 32px;
@@ -773,7 +803,14 @@
 
     <!-- Header -->
     <div class="page-header">
-        <h1>🤖 模型管理</h1>
+        <div class="header-left">
+            <button class="back-btn" id="back-to-home" title="返回主界面">
+                <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                </svg>
+            </button>
+            <h1>🤖 模型管理</h1>
+        </div>
         <button class="add-model-btn" id="open-modal">
             <span>+</span> 添加新模型
         </button>
@@ -1017,6 +1054,12 @@
         const saveBtn = document.getElementById('save-btn');
         const deleteBtn = document.getElementById('delete-btn');
         const themeToggle = document.getElementById('theme-toggle');
+        const backToHomeBtn = document.getElementById('back-to-home');
+
+        // 返回主界面
+        backToHomeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
 
         let isEditMode = false;
         let editingModelId = null;
