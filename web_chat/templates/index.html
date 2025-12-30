@@ -2406,7 +2406,13 @@
                         list.appendChild(btn);
                     });
                     if (models.length > 0 && !list.querySelector('.selected')) {
-                        selectModel(models[0], list.firstChild);
+                        // 优先选择上次保存的模型，如果不存在则选择第一个
+                        const savedModel = localStorage.getItem('currentModel');
+                        const modelToSelect = models.includes(savedModel) ? savedModel : models[0];
+                        const targetButton = Array.from(list.children).find(
+                            btn => btn.querySelector('.model-name')?.textContent === modelToSelect
+                        );
+                        selectModel(modelToSelect, targetButton || list.firstChild);
                     }
                 });
         }
@@ -2434,6 +2440,8 @@
 
         function selectModel(model, element) {
             currentModel = model;
+            // 保存当前模型到 localStorage
+            localStorage.setItem('currentModel', model);
             document.getElementById('current-model-name').innerText = model.toUpperCase();
 
             // Update active state
