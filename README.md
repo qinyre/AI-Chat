@@ -39,9 +39,10 @@
 
 ### 核心价值
 
-- 🔄 **多引擎聚合** - 一站式体验 5 大主流 AI 模型
+- 🔄 **多引擎聚合** - 一站式体验 5+ 大主流 AI 模型
 - ➕ **自定义模型** - 支持通过前端界面添加自定义 LLM 模型
 - ⚡ **实时流式** - 基于 SSE 的流式响应，即时打字机体验
+- 🛑 **中断输出** - AI 生成时可随时中断，保存部分响应
 - 💬 **独立对话** - 每个模型维护独立的对话历史
 - 🎨 **现代界面** - 玻璃拟态设计，支持深色/浅色主题
 - 🔒 **安全配置** - 前端本地配置，密钥文件不提交版本控制
@@ -57,6 +58,7 @@
 | **多模型支持** | 集成 Google Gemini、DeepSeek、Moonshot/Kimi、Qwen、Spark 五大 AI 模型 |
 | **自定义模型** | 支持通过前端界面添加自定义 LLM 模型 |
 | **实时流式响应** | 基于 Server-Sent Events (SSE) 的流式传输，提供即时反馈 |
+| **中断 AI 输出** | AI 生成时发送按钮变为中断按钮，可随时停止生成并保存部分响应 |
 | **独立对话历史** | 每个模型维护独立的对话上下文，支持多轮对话 |
 | **Markdown 渲染** | 支持 Markdown 格式的响应内容，包含代码高亮 |
 | **主题切换** | 支持深色/浅色主题自由切换 |
@@ -67,6 +69,8 @@
 - ✅ **统一抽象层** - 通过 `LLMWrapper` 类统一不同 LLM 提供商的 API
 - ✅ **本地配置存储** - API 密钥本地文件存储，前端可视化配置
 - ✅ **动态模型管理** - 通过前端界面添加/删除自定义模型，无需修改代码
+- ✅ **模块化前端** - JavaScript 模块化架构，职责清晰，易于维护
+- ✅ **请求中断** - 基于 AbortController 的请求取消机制
 - ✅ **RESTful API** - 标准的 HTTP 接口设计
 - ✅ **流式传输** - Python 生成器 + Flask 流式响应
 - ✅ **无框架前端** - 原生 JavaScript，无额外依赖
@@ -100,6 +104,11 @@
 │                                                               │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+**中断 AI 输出功能**：
+- AI 生成时，发送按钮自动变为中断按钮（⬛）
+- 点击中断按钮可随时停止 AI 生成
+- 已生成的部分内容会自动保存并显示 `[已中断]` 标记
 
 ---
 
@@ -195,6 +204,7 @@ python web_chat/app.py
 2. **输入消息** - 在底部输入框输入您的问题
 3. **发送请求** - 点击"发送"按钮或按 Enter 键
 4. **查看响应** - AI 的回复会以流式方式逐字显示
+5. **中断输出** - AI 生成时，发送按钮变为中断按钮（⬛），点击可随时停止
 
 ### 高级功能
 
@@ -265,9 +275,23 @@ AI: Python 的主要特点包括...（基于上一轮对话的上下文）
 
 | 技术 | 用途 |
 |------|------|
-| **原生 JavaScript** | 交互逻辑 |
-| **TailwindCSS** | 样式框架（CDN） |
+| **原生 JavaScript (ES6+)** | 模块化交互逻辑 |
 | **Marked.js** | Markdown 渲染 |
+| **Highlight.js** | 代码语法高亮 |
+| **TailwindCSS** | 样式框架（CDN） |
+
+**前端模块架构**：
+```
+static/js/
+├── app.js           # 应用入口，初始化所有模块
+├── state.js         # 全局状态管理（模型、历史、发送状态）
+├── icons.js         # 模型图标管理（内置图标 + 上传图标）
+├── theme.js         # 主题切换（深色/浅色）
+├── models.js        # 模型列表渲染与切换
+├── chat.js          # 聊天功能（发送、流式、中断）
+├── api-config.js    # API 密钥配置管理
+└── ui.js            # UI 交互（侧边栏、欢迎页、通知）
+```
 
 ### LLM 提供商
 
@@ -289,15 +313,33 @@ AI-Chat/
 ├── web_chat/                   # Web 应用主目录
 │   ├── app.py                  # Flask 应用入口
 │   ├── llm_wrapper.py          # LLM 抽象层核心
-│   ├── model_manager.py         # 模型管理模块
-│   ├── models.json.example      # 模型配置模板（Git 追踪）
-│   ├── models.json              # 用户模型配置（本地，不追踪）
+│   ├── model_manager.py        # 模型管理模块
+│   ├── models.json.example     # 模型配置模板（Git 追踪）
+│   ├── models.json             # 用户模型配置（本地，不追踪）
 │   ├── templates/
 │   │   ├── index.html          # 前端主页面
 │   │   └── model_manager.html  # 模型管理页面
+│   ├── static/
+│   │   ├── css/
+│   │   │   └── main.css        # 样式文件（玻璃拟态设计）
+│   │   └── js/
+│   │       ├── app.js          # 应用入口
+│   │       ├── state.js        # 全局状态管理
+│   │       ├── icons.js        # 图标管理
+│   │       ├── theme.js        # 主题切换
+│   │       ├── models.js       # 模型列表
+│   │       ├── chat.js         # 聊天功能
+│   │       ├── api-config.js   # API 配置
+│   │       └── ui.js           # UI 交互
 │   ├── assets/
-│        └── icons/              # 模型图标资源
-│   └── api_keys.json            # API 密钥本地存储（不追踪）
+│   │    └── icons/             # 模型图标资源
+│   │        ├── gemini_logo.svg
+│   │        ├── deepseek_logo.svg
+│   │        ├── kimi_logo.svg
+│   │        ├── qwen_logo.svg
+│   │        ├── spark_logo.svg
+│   │        └── zhipu_logo.svg
+│   └── api_keys.json           # API 密钥本地存储（不追踪）
 │
 ├── docs/                       # 项目文档目录
 │   └── API_KEY_GUIDE.md        # API Key 申请指南
@@ -313,11 +355,27 @@ AI-Chat/
 
 ### 核心文件说明
 
+#### 后端
 - **`app.py`** - Flask 应用入口，定义路由和启动配置
 - **`llm_wrapper.py`** - LLM 抽象层，统一不同提供商的 API，支持动态模型加载
 - **`model_manager.py`** - 模型管理模块，提供模型的增删改查功能
+
+#### 前端模板
 - **`templates/index.html`** - 前端主页面，聊天界面和 API 密钥配置
 - **`templates/model_manager.html`** - 模型管理页面，添加/编辑/删除自定义模型
+
+#### 前端 JavaScript 模块
+- **`static/js/app.js`** - 应用入口，初始化所有模块并绑定事件
+- **`static/js/state.js`** - 全局状态管理（当前模型、对话历史、发送状态、中断控制器）
+- **`static/js/icons.js`** - 模型图标管理，支持内置图标和自定义上传图标
+- **`static/js/theme.js`** - 主题切换功能（深色/浅色模式）
+- **`static/js/models.js`** - 模型列表渲染和模型切换逻辑
+- **`static/js/chat.js`** - 聊天核心功能（发送消息、流式响应、中断输出）
+- **`static/js/api-config.js`** - API 密钥配置管理（显示/隐藏、保存）
+- **`static/js/ui.js`** - UI 交互（侧边栏、欢迎页、清空历史、通知）
+
+#### 样式
+- **`static/css/main.css`** - 全局样式，玻璃拟态设计，支持深色/浅色主题
 
 ---
 
@@ -418,6 +476,10 @@ pytest --cov=web_chat --cov-report=html
 ### ❓ 为什么 Spark 模型没有对话历史？
 
 **答**: Spark API 的限制导致它不支持上下文记忆。每次请求仅发送当前用户消息，不传递历史记录。这是 Spark API 的设计限制，不是项目的问题。
+
+### ❓ 如何中断 AI 输出？
+
+**答**: AI 生成时，发送按钮会自动变为中断按钮（⬛）。点击中断按钮即可停止 AI 生成，已生成的部分内容会自动保存并显示 `[已中断]` 标记。
 
 ### ❓ 流式响应中断怎么办？
 
