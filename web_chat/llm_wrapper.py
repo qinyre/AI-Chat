@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 # 加载环境变量（优先从 .env 文件）
 load_dotenv()
 
+# 模型配置文件路径
+MODELS_FILE = os.path.join(os.path.dirname(__file__), "models.json")
+
+
 class LLMWrapper:
     def __init__(self, custom_api_keys=None):
         """
@@ -22,8 +26,11 @@ class LLMWrapper:
         # 从环境变量读取配置，提供安全的 API 密钥管理
         self.configs = self._load_configs()
 
-    def _load_configs(self):
-        """加载配置，优先使用前端提供的密钥"""
+    def _get_default_configs(self):
+        """
+        获取默认内置模型配置
+        这些是系统预定义的模型，确保基础功能始终可用
+        """
         return {
             "google": {
                 "type": "google",
@@ -57,6 +64,65 @@ class LLMWrapper:
                 "model": "x1"
             }
         }
+
+    def _load_models_from_file(self):
+        """
+        从 models.json 加载自定义模型配置
+        返回格式: {"model_id": {config_dict}, ...}
+        """
+        if not os.path.exists(MODELS_FILE):
+            return {}
+
+        try:
+            with open(MODELS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+
+            models_config = {}
+            for model in data.get("models", []):
+                if not model.get("enabled", True):
+                    continue
+
+                model_id = model["id"]
+                api_key_name = model.get("api_key_name", "")
+                config = {
+                    "type": model["type"],
+                    "model": model["model"],
+                    "api_key": self.custom_api_keys.get(api_key_name) or os.environ.get(api_key_name, "")
+                }
+
+                # 根据类型添加可选字段
+                if model["type"] == "openai":
+                    if "base_url" in model:
+                        config["base_url"] = model["base_url"]
+                    if "system" in model:
+                        config["system"] = model["system"]
+                elif model["type"] in ["requests_sse", "spark_requests"]:
+                    if "url" in model:
+                        config["url"] = model["url"]
+                elif model["type"] == "google":
+                    pass  # Google 只需要 api_key 和 model
+
+                models_config[model_id] = config
+
+            return models_config
+
+        except (json.JSONDecodeError, IOError, KeyError) as e:
+            print(f"Failed to load models from file: {e}", flush=True)
+            return {}
+
+    def _load_configs(self):
+        """
+        加载模型配置
+        合并默认内置模型和 models.json 中的自定义模型
+        """
+        # 获取默认内置模型配置
+        default_configs = self._get_default_configs()
+
+        # 从文件加载自定义模型配置
+        custom_configs = self._load_models_from_file()
+
+        # 合并配置（自定义模型可以覆盖默认模型）
+        return {**default_configs, **custom_configs}
 
     def get_models(self):
         return list(self.configs.keys())

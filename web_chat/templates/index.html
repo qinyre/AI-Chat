@@ -1193,6 +1193,53 @@
             color: var(--accent-blue);
         }
 
+        /* 模型管理按钮 */
+        .model-manager-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-manager-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-green), var(--accent-emerald));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .model-manager-btn:hover::before {
+            opacity: 0.1;
+        }
+
+        .model-manager-btn:hover {
+            border-color: var(--accent-green);
+            transform: scale(1.05);
+        }
+
+        .model-manager-btn svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .model-manager-btn:hover svg {
+            color: var(--accent-green);
+        }
+
         /* 按钮容器 */
         .sidebar-buttons {
             display: flex;
@@ -1738,6 +1785,12 @@
                         <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                        </svg>
+                    </button>
+                    <button class="model-manager-btn" id="model-manager-btn" title="模型管理">
+                        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M8.25 3v1.5M4.5 8.25H3m18 0h-1.5M4.5 12H3m18 0h-1.5m-15 3.75H3m18 0h-1.5M8.25 19.5V21M12 3v1.5m0 15V21m3.75-18v1.5m0 15V21m-9-1.5h10.5a2.25 2.25 0 002.25-2.25V6.75a2.25 2.25 0 00-2.25-2.25H6.75A2.25 2.25 0 004.5 6.75v10.5a2.25 2.25 0 002.25 2.25z" />
                         </svg>
                     </button>
                 </div>
@@ -2889,6 +2942,11 @@
         document.getElementById('close-api-config').addEventListener('click', closeApiConfigModal);
         document.getElementById('cancel-api-config').addEventListener('click', closeApiConfigModal);
         document.getElementById('save-api-config').addEventListener('click', saveApiConfig);
+
+        // 绑定模型管理按钮事件
+        document.getElementById('model-manager-btn').addEventListener('click', function() {
+            window.open('/model_manager', '_blank');
+        });
 
         // 点击遮罩层关闭模态框
         document.getElementById('api-config-modal').addEventListener('click', function (e) {

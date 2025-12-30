@@ -9,6 +9,8 @@
 .env.*.local
 # 包含 API 密钥的配置文件
 web_chat/api_keys.json
+# 用户自定义模型配置（保留初始模型在 models.json.example）
+web_chat/models.json
 
 # ====================
 # Python 相关

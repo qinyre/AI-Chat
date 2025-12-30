@@ -9,13 +9,25 @@ from flask import jsonify, request
 from werkzeug.utils import secure_filename
 
 MODELS_FILE = os.path.join(os.path.dirname(__file__), "models.json")
+MODELS_EXAMPLE_FILE = os.path.join(os.path.dirname(__file__), "models.json.example")
 ICONS_DIR = os.path.join(os.path.dirname(__file__), "assets", "icons")
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "svg", "gif"}
 
 
 def load_models():
+    # 如果 models.json 不存在，从 example 文件复制
     if not os.path.exists(MODELS_FILE):
-        return {"version": "1.0.0", "models": [], "api_types": {}}
+        if os.path.exists(MODELS_EXAMPLE_FILE):
+            try:
+                import shutil
+                shutil.copy2(MODELS_EXAMPLE_FILE, MODELS_FILE)
+                print(f"Initialized {MODELS_FILE} from {MODELS_EXAMPLE_FILE}", flush=True)
+            except IOError as e:
+                print(f"Failed to copy example file: {e}", flush=True)
+                return {"version": "1.0.0", "models": [], "api_types": {}}
+        else:
+            return {"version": "1.0.0", "models": [], "api_types": {}}
+
     try:
         with open(MODELS_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -95,6 +107,16 @@ def delete_model(model_id):
     return jsonify({"success": False, "message": "模型不存在"}), 404
 
 
+def get_model(model_id):
+    """获取单个模型的详细信息"""
+    data = load_models()
+    models = data.get("models", [])
+    for model in models:
+        if model["id"] == model_id:
+            return jsonify({"success": True, "model": model})
+    return jsonify({"success": False, "message": "模型不存在"}), 404
+
+
 def upload_icon():
     if "file" not in request.files:
         return jsonify({"success": False, "message": "没有文件"}), 400
@@ -121,15 +143,19 @@ def register_routes(app):
     @app.route("/api/models/list", methods=["GET"])
     def api_get_models():
         return get_all_models()
-    
+
+    @app.route("/api/models/<model_id>", methods=["GET"])
+    def api_get_model(model_id):
+        return get_model(model_id)
+
     @app.route("/api/models", methods=["POST"])
     def api_add_model():
         return add_model()
-    
+
     @app.route("/api/models/<model_id>", methods=["DELETE"])
     def api_delete_model(model_id):
         return delete_model(model_id)
-    
+
     @app.route("/api/models/icon/upload", methods=["POST"])
     def api_upload_icon():
         return upload_icon()

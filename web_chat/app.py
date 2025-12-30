@@ -1,10 +1,14 @@
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify, send_from_directory
 from llm_wrapper import LLMWrapper
+from model_manager import register_routes
 import os
 import json
 
 app = Flask(__name__)
 llm = LLMWrapper()
+
+# 注册模型管理路由
+register_routes(app)
 
 # API 密钥本地存储文件路径
 API_KEYS_FILE = os.path.join(os.path.dirname(__file__), 'api_keys.json')
@@ -35,6 +39,12 @@ def save_api_keys_to_file(api_keys):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+
+@app.route('/model_manager')
+def model_manager_page():
+    """模型管理页面"""
+    return render_template('model_manager.html')
 
 
 @app.route('/assets/icons/<filename>')

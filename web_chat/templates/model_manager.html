@@ -967,18 +967,25 @@
             if (systemPrompt) modelData.system = systemPrompt;
 
             try {
-                // In real implementation, send to API
+                // Send to API
                 console.log('Saving model:', modelData);
 
-                // TODO: Implement API call
-                // await fetch('/api/models', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(modelData)
-                // });
+                const response = await fetch('/api/models', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(modelData)
+                });
 
-                closeModal();
-                alert('模型保存成功！（演示模式）');
+                const result = await response.json();
+
+                if (result.success) {
+                    closeModal();
+                    alert('模型保存成功！');
+                    // 可选：刷新模型列表
+                    loadModelsList();
+                } else {
+                    throw new Error(result.message || '保存失败');
+                }
             } catch (error) {
                 console.error('Error saving model:', error);
                 alert('保存失败：' + error.message);
@@ -991,13 +998,20 @@
 
             if (confirm(`确定要删除模型 "${editingModelId}" 吗？`)) {
                 try {
-                    // TODO: Implement API call
-                    // await fetch(`/api/models/${editingModelId}`, {
-                    //     method: 'DELETE'
-                    // });
+                    const response = await fetch(`/api/models/${editingModelId}`, {
+                        method: 'DELETE'
+                    });
 
-                    closeModal();
-                    alert('模型已删除！（演示模式）');
+                    const result = await response.json();
+
+                    if (result.success) {
+                        closeModal();
+                        alert('模型已删除！');
+                        // 可选：刷新模型列表
+                        loadModelsList();
+                    } else {
+                        throw new Error(result.message || '删除失败');
+                    }
                 } catch (error) {
                     console.error('Error deleting model:', error);
                     alert('删除失败：' + error.message);
@@ -1032,15 +1046,76 @@
             document.getElementById('modal-title-text').textContent = '编辑模型';
             deleteBtn.style.display = 'block';
 
-            // TODO: Load model data from API
-            // fetch(`/api/models/${modelId}`)
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         // Populate form
-            //     });
+            // Load model data from API
+            fetch(`/api/models/${modelId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.model) {
+                        const model = data.model;
+
+                        // Populate form with model data
+                        document.getElementById('model-id').value = model.id || '';
+                        document.getElementById('model-id').disabled = true; // ID cannot be changed
+                        document.getElementById('model-name').value = model.name || '';
+
+                        // Set API type
+                        const typeRadio = document.getElementById(`type_${model.type}`);
+                        if (typeRadio) typeRadio.checked = true;
+
+                        document.getElementById('model-name-api').value = model.model || '';
+                        document.getElementById('api-key-name').value = model.api_key_name || '';
+
+                        // Set optional fields based on type
+                        if (model.type === 'openai' && model.base_url) {
+                            document.getElementById('base-url').value = model.base_url;
+                        }
+                        if ((model.type === 'requests_sse' || model.type === 'spark_requests') && model.url) {
+                            document.getElementById('full-url').value = model.url;
+                        }
+                        if (model.system) {
+                            document.getElementById('system-prompt').value = model.system;
+                        }
+
+                        // Set icon
+                        if (model.icon) {
+                            const iconRadio = document.querySelector(`input[name="icon-choice"][value="${model.icon}"]`);
+                            if (iconRadio) {
+                                iconRadio.checked = true;
+                            } else {
+                                // Custom icon
+                                document.getElementById('icon_upload').checked = true;
+                                document.getElementById('custom-icon-url').value = `/assets/icons/${model.icon}`;
+                            }
+                        }
+
+                        updateDynamicFields();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error loading model:', err);
+                    alert('加载模型数据失败：' + err.message);
+                });
 
             modal.classList.add('active');
         }
+
+        // Load models list from API
+        async function loadModelsList() {
+            try {
+                const response = await fetch('/api/models/list');
+                const data = await response.json();
+                if (data.success) {
+                    console.log('Models loaded:', data.models.length);
+                    // 这里可以更新模型列表显示
+                    // 目前模型管理页面还没有列表视图，这只是为未来功能预留
+                }
+            } catch (error) {
+                console.error('Error loading models list:', error);
+            }
+        }
+
+        // Initial load
+        loadModelsList();
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
