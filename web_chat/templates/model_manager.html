@@ -913,6 +913,16 @@
                             </div>
                         </label>
                     </div>
+                    <div class="api-type-option">
+                        <input type="radio" name="api_type" id="type_zhipu" value="zhipu">
+                        <label class="api-type-label" for="type_zhipu">
+                            <div class="api-type-icon">🔮</div>
+                            <div class="api-type-info">
+                                <div class="api-type-name">智谱 GLM</div>
+                                <div class="api-type-desc">智谱 AI (JWT Token)</div>
+                            </div>
+                        </label>
+                    </div>
                 </div>
             </div>
 
@@ -1110,6 +1120,7 @@
             // Show relevant fields based on API type
             switch (selectedType) {
                 case 'openai':
+                case 'zhipu':
                     fieldBaseUrl.classList.add('visible');
                     fieldSystemPrompt.classList.add('visible');
                     break;
@@ -1156,7 +1167,7 @@
             });
 
             // Type-specific validation
-            if (selectedType === 'openai') {
+            if (selectedType === 'openai' || selectedType === 'zhipu') {
                 const baseUrl = document.getElementById('base-url');
                 if (!baseUrl.value.trim()) {
                     baseUrl.classList.add('error');
@@ -1333,7 +1344,7 @@
                         document.getElementById('api-key-name').value = model.api_key_name || '';
 
                         // Set optional fields based on type
-                        if (model.type === 'openai' && model.base_url) {
+                        if ((model.type === 'openai' || model.type === 'zhipu') && model.base_url) {
                             document.getElementById('base-url').value = model.base_url;
                         }
                         if ((model.type === 'requests_sse' || model.type === 'spark_requests') && model.url) {
@@ -1464,7 +1475,8 @@
                 'google': 'Google Gemini',
                 'openai': 'OpenAI 兼容',
                 'requests_sse': 'HTTP + SSE',
-                'spark_requests': 'Spark 特殊'
+                'spark_requests': 'Spark 特殊',
+                'zhipu': '智谱 GLM'
             };
             return typeNames[type] || type;
         }

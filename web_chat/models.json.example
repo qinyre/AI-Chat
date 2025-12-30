@@ -85,6 +85,14 @@
       "optional": [],
       "supports_system_prompt": false,
       "supports_history": false
+    },
+    "zhipu": {
+      "name": "智谱 GLM",
+      "description": "智谱 AI GLM 系列，使用 JWT Token 认证",
+      "requires": ["api_key", "base_url", "model"],
+      "optional": ["system"],
+      "supports_system_prompt": true,
+      "supports_history": true
     }
   }
 }

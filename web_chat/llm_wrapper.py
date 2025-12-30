@@ -1,6 +1,10 @@
 import os
 import json
 import requests
+import time
+import hmac
+import hashlib
+import base64
 from openai import OpenAI
 import google.genai as genai
 from google.genai import types
@@ -99,6 +103,11 @@ class LLMWrapper:
                 elif model["type"] in ["requests_sse", "spark_requests"]:
                     if "url" in model:
                         config["url"] = model["url"]
+                elif model["type"] == "zhipu":
+                    if "base_url" in model:
+                        config["base_url"] = model["base_url"]
+                    if "system" in model:
+                        config["system"] = model["system"]
                 elif model["type"] == "google":
                     pass  # Google 只需要 api_key 和 model
 
@@ -159,6 +168,8 @@ class LLMWrapper:
                 yield from self._chat_qwen(config, messages)
             elif config["type"] == "spark_requests":
                 yield from self._chat_spark(config, messages)
+            elif config["type"] == "zhipu":
+                yield from self._chat_zhipu(config, messages)
             else:
                 yield "Error: Unimplemented model type"
         except Exception as e:
@@ -270,15 +281,15 @@ class LLMWrapper:
         auth = config["api_key"]
         if not auth.startswith("Bearer "):
             auth = f"Bearer {auth}"
-            
+
         headers = {
             'Authorization': auth,
             'content-type': "application/json"
         }
-        
+
         # Spark in original script only took the LAST message.
-        # But we should try to support history if possible. 
-        # The original script `spark.py` specifically said: 
+        # But we should try to support history if possible.
+        # The original script `spark.py` specifically said:
         # "Each time deliver only current user message, no history" (line 78).
         # We will respect that behavior for Spark to ensure it works.
         last_user_msg = next((m for m in reversed(messages) if m["role"] == "user"), None)
@@ -291,9 +302,9 @@ class LLMWrapper:
             "messages": [{"role": "user", "content": last_user_msg["content"]}],
             "stream": True
         }
-        
+
         response = requests.post(config["url"], json=body, headers=headers, stream=True)
-        
+
         for line in response.iter_lines():
             if not line: continue
             line_str = line.decode('utf-8')
@@ -307,3 +318,105 @@ class LLMWrapper:
                         yield content
                 except:
                     pass
+
+    def _generate_zhipu_token(self, api_key):
+        """
+        生成智谱 AI 的 JWT Token
+        api_key 格式: id.secret
+        """
+        try:
+            id, secret = api_key.split('.')
+        except ValueError:
+            raise ValueError("智谱 API Key 格式错误，应为 id.secret")
+
+        # Token 有效期：1小时
+        exp = int(time.time()) + 3600
+
+        header = {
+            "alg": "HS256",
+            "sign_type": "SIGN"
+        }
+
+        payload = {
+            "api_key": id,
+            "exp": exp,
+            "timestamp": int(time.time())
+        }
+
+        # 编码 header
+        header_b64 = base64.urlsafe_b64encode(
+            json.dumps(header, separators=(',', ':')).encode()
+        ).decode().rstrip('=')
+
+        # 编码 payload
+        payload_b64 = base64.urlsafe_b64encode(
+            json.dumps(payload, separators=(',', ':')).encode()
+        ).decode().rstrip('=')
+
+        # 生成签名
+        message = f"{header_b64}.{payload_b64}"
+        signature = hmac.new(
+            secret.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).digest()
+
+        signature_b64 = base64.urlsafe_b64encode(signature).decode().rstrip('=')
+
+        return f"{message}.{signature_b64}"
+
+    def _chat_zhipu(self, config, messages):
+        """
+        智谱 AI (GLM) 聊天方法
+        使用 JWT Token 认证
+        """
+        base_url = config.get("base_url", "https://open.bigmodel.cn/api/paas/v4")
+
+        # 生成 JWT Token
+        token = self._generate_zhipu_token(config["api_key"])
+
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        }
+
+        # 注入系统提示词
+        params_messages = list(messages)
+        if "system" in config:
+            if not params_messages or params_messages[0]["role"] != "system":
+                params_messages.insert(0, {"role": "system", "content": config["system"]})
+
+        payload = {
+            "model": config["model"],
+            "messages": params_messages,
+            "stream": True
+        }
+
+        response = requests.post(
+            f"{base_url}/chat/completions",
+            json=payload,
+            headers=headers,
+            stream=True
+        )
+
+        try:
+            response.raise_for_status()
+        except requests.HTTPError as e:
+            yield f"Error: HTTP {e.response.status_code} - {e.response.text}"
+            return
+
+        for line in response.iter_lines():
+            if not line:
+                continue
+            line_str = line.decode('utf-8')
+            if line_str.startswith('data: '):
+                data_str = line_str[6:].strip()
+                if data_str == '[DONE]':
+                    break
+                try:
+                    data = json.loads(data_str)
+                    content = data["choices"][0]["delta"].get("content", "")
+                    if content:
+                        yield content
+                except (json.JSONDecodeError, KeyError, IndexError):
+                    continue
