@@ -960,10 +960,19 @@
                 <div class="form-group">
                     <label class="form-label">
                         API Key 环境变量名 <span class="required">*</span>
-                        <span class="hint">如: CUSTOM_API_KEY</span>
+                        <span class="hint">如: CUSTOM_API_KEY（自动生成）</span>
                     </label>
-                    <input type="text" class="form-input" id="api-key-name" placeholder="CUSTOM_API_KEY" required>
-                    <div class="error-message">请输入 API Key 环境变量名</div>
+                    <input type="text" class="form-input" id="api-key-name" placeholder="自动生成" readonly required>
+                    <div class="error-message">请输入模型 ID 以自动生成</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        API Key 值 <span class="required">*</span>
+                        <span class="hint">您的实际 API Key，将保存到本地配置</span>
+                    </label>
+                    <input type="password" class="form-input" id="api-key-value" placeholder="sk-..." required>
+                    <div class="error-message">请输入 API Key 值</div>
                 </div>
             </div>
 
@@ -1091,6 +1100,19 @@
             modal.classList.add('active');
         });
 
+        // Auto-generate API Key name from model ID
+        const modelIdInput = document.getElementById('model-id');
+        const apiKeyNameInput = document.getElementById('api-key-name');
+
+        modelIdInput.addEventListener('input', () => {
+            const modelId = modelIdInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '_');
+            if (modelId) {
+                apiKeyNameInput.value = `${modelId}_API_KEY`;
+            } else {
+                apiKeyNameInput.value = '';
+            }
+        });
+
         // Close Modal
         function closeModal() {
             modal.classList.remove('active');
@@ -1148,13 +1170,17 @@
             let isValid = true;
             const selectedType = document.querySelector('input[name="api_type"]:checked').value;
 
-            // Required fields
+            // Required fields (API key value is optional in edit mode)
             const requiredFields = [
                 { id: 'model-id', message: '请输入模型 ID' },
                 { id: 'model-name', message: '请输入模型名称' },
-                { id: 'model-identifier', message: '请输入模型标识' },
-                { id: 'api-key-name', message: '请输入 API Key 环境变量名' }
+                { id: 'model-identifier', message: '请输入模型标识' }
             ];
+
+            // Add API key value validation only for new models
+            if (!isEditMode) {
+                requiredFields.push({ id: 'api-key-value', message: '请输入 API Key 值' });
+            }
 
             requiredFields.forEach(field => {
                 const input = document.getElementById(field.id);
@@ -1225,12 +1251,15 @@
         saveBtn.addEventListener('click', async () => {
             if (!validateForm()) return;
 
+            const apiKeyName = document.getElementById('api-key-name').value.trim().toUpperCase();
+            let apiKeyValue = document.getElementById('api-key-value').value.trim();
+
             const modelData = {
                 id: document.getElementById('model-id').value.trim(),
                 name: document.getElementById('model-name').value.trim(),
                 type: document.querySelector('input[name="api_type"]:checked').value,
                 model: document.getElementById('model-identifier').value.trim(),
-                api_key_name: document.getElementById('api-key-name').value.trim().toUpperCase(),
+                api_key_name: apiKeyName,
                 icon: document.querySelector('input[name="model_icon"]:checked')?.value || 'openai'
             };
 
@@ -1245,7 +1274,24 @@
             if (systemPrompt) modelData.system = systemPrompt;
 
             try {
-                // Send to API
+                // For editing mode, if API key value is empty, try to use existing key
+                if (isEditMode && !apiKeyValue) {
+                    try {
+                        const configResponse = await fetch('/api/config/load');
+                        const existingKeys = await configResponse.json();
+                        apiKeyValue = existingKeys[apiKeyName] || '';
+                    } catch (e) {
+                        // If we can't load existing keys, continue without API key value
+                    }
+                }
+
+                // Require API key for new models
+                if (!isEditMode && !apiKeyValue) {
+                    alert('请输入 API Key 值');
+                    return;
+                }
+
+                // Save the model
                 console.log('Saving model:', modelData);
 
                 const response = await fetch('/api/models', {
@@ -1257,9 +1303,29 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    // Save API Key to api_keys.json (only if value is provided)
+                    if (apiKeyValue) {
+                        try {
+                            // Load existing API keys
+                            const configResponse = await fetch('/api/config/load');
+                            const existingKeys = await configResponse.json();
+
+                            // Add/update the API key
+                            existingKeys[apiKeyName] = apiKeyValue;
+
+                            // Save back to server
+                            await fetch('/api/config/save', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(existingKeys)
+                            });
+                        } catch (configError) {
+                            console.error('Error saving API key:', configError);
+                        }
+                    }
+
                     closeModal();
                     alert('模型保存成功！');
-                    // 可选：刷新模型列表
                     loadModelsList();
                 } else {
                     throw new Error(result.message || '保存失败');
@@ -1303,6 +1369,7 @@
             document.getElementById('model-name').value = '';
             document.getElementById('model-identifier').value = '';
             document.getElementById('api-key-name').value = '';
+            document.getElementById('api-key-value').value = '';
             document.getElementById('base-url').value = '';
             document.getElementById('full-url').value = '';
             document.getElementById('system-prompt').value = '';
@@ -1342,6 +1409,20 @@
 
                         document.getElementById('model-identifier').value = model.model || '';
                         document.getElementById('api-key-name').value = model.api_key_name || '';
+
+                        // Load existing API key value (if available)
+                        // Note: For security, we just check if it exists, don't display the full value
+                        fetch('/api/config/load')
+                            .then(res => res.json())
+                            .then(apiKeys => {
+                                const existingKey = apiKeys[model.api_key_name];
+                                if (existingKey) {
+                                    document.getElementById('api-key-value').placeholder = '已配置（留空保持不变）';
+                                }
+                            })
+                            .catch(() => {
+                                // Ignore error loading API keys
+                            });
 
                         // Set optional fields based on type
                         if ((model.type === 'openai' || model.type === 'zhipu') && model.base_url) {
