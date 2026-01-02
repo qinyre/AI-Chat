@@ -96,4 +96,6 @@ CLAUDE.md
 web_chat/CLAUDE.md
 .mcp
 .mcp.json
+.shared
+.agent
 # 工作流和 AI 临时文件
