@@ -95,3 +95,48 @@ def app_context():
 def client(app_context):
     """Flask 测试客户端"""
     return app_context.test_client()
+
+
+@pytest.fixture
+def temp_models_file():
+    """创建临时模型配置文件
+
+    Returns:
+        str: 临时文件路径
+    """
+    fd, path = tempfile.mkstemp(suffix='.json')
+    os.close(fd)
+    yield path
+    # 清理
+    if os.path.exists(path):
+        os.remove(path)
+
+
+@pytest.fixture
+def temp_dir():
+    """创建临时目录
+
+    Returns:
+        str: 临时目录路径
+    """
+    temp_path = tempfile.mkdtemp()
+    yield temp_path
+    # 清理
+    import shutil
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
+
+
+@pytest.fixture
+def temp_icons_dir():
+    """创建临时图标目录
+
+    Returns:
+        str: 临时图标目录路径
+    """
+    temp_path = tempfile.mkdtemp()
+    yield temp_path
+    # 清理
+    import shutil
+    if os.path.exists(temp_path):
+        shutil.rmtree(temp_path)
