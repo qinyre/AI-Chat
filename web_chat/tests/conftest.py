@@ -14,6 +14,9 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / 'web_chat'))
 
+# 在导入 app 之前设置测试配置
+os.environ['FLASK_TESTING'] = 'True'
+
 
 @pytest.fixture
 def temp_config_file():
@@ -80,6 +83,20 @@ def mock_llm_response_stream():
         for chunk in chunks:
             yield chunk
     return _generate
+
+
+@pytest.fixture(autouse=True)
+def disable_rate_limiting():
+    """在测试环境中禁用速率限制
+
+    自动应用于所有测试，确保测试不会因为速率限制而失败。
+    """
+    from flask_limiter import Limiter
+    from flask_limiter.util import get_remote_address
+    from web_chat.app import app
+
+    # 在测试配置中标记为测试环境
+    app.config['TESTING'] = True
 
 
 @pytest.fixture

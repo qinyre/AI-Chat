@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, Response, stream_with_context, jsonify, send_from_directory
 from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from llm_wrapper import LLMWrapper
 from model_manager import register_routes
 import os
@@ -27,15 +29,54 @@ app = Flask(__name__)
 # 配置
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production-use-openssl-rand-hex-32')
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+# 检查是否在测试环境中
+app.config['TESTING'] = os.environ.get('FLASK_TESTING') == 'True'
 
 # CSRF 保护
 csrf = CSRFProtect(app)
 
+# 速率限制（在测试环境中禁用）
+if app.config.get('TESTING'):
+    # 测试环境：使用极高的限制值，实际上禁用速率限制
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["10000 per day", "10000 per hour"],
+        storage_uri="memory://",
+        strategy="fixed-window"
+    )
+else:
+    # 生产环境：正常速率限制
+    limiter = Limiter(
+        get_remote_address,
+        app=app,
+        default_limits=["200 per day", "50 per hour"],
+        storage_uri="memory://",
+        strategy="fixed-window"
+    )
+
 # 初始化 LLM Wrapper
 llm = LLMWrapper()
 
-# 注册模型管理路由
-register_routes(app)
+# 注册模型管理路由（传入 limiter 以启用速率限制）
+register_routes(app, limiter)
+
+# 速率限制辅助函数（根据环境调整限制）
+def rate_limit(limit_string: str):
+    """根据环境返回速率限制装饰器
+
+    Args:
+        limit_string: 限制字符串，如 "10 per minute"
+
+    Returns:
+        装饰器函数
+    """
+    if app.config.get('TESTING'):
+        # 测试环境：使用极高的限制
+        return limiter.limit("10000 per minute")
+    else:
+        # 生产环境：使用指定的限制
+        return limiter.limit(limit_string)
 
 # API 密钥本地存储文件路径
 API_KEYS_FILE = os.path.join(os.path.dirname(__file__), 'api_keys.json')
@@ -106,6 +147,7 @@ def load_config():
 
 
 @app.route('/api/config/save', methods=['POST'])
+@rate_limit("5 per minute")  # 速率限制：每分钟最多 5 次请求
 @csrf.exempt  # API 端点使用其他认证方式
 def save_config() -> tuple[Response, int] | Response:
     """保存 API 密钥配置
@@ -132,6 +174,7 @@ def save_config() -> tuple[Response, int] | Response:
 
 
 @app.route('/api/chat', methods=['POST'])
+@rate_limit("10 per minute")  # 速率限制：每分钟最多 10 次请求
 @csrf.exempt  # API 端点使用其他认证方式（API Key）
 def chat() -> tuple[Response, int] | Response:
     """流式聊天端点

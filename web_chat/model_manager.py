@@ -401,11 +401,12 @@ def upload_icon() -> Union[Tuple[Response, int], Response]:
     })
 
 
-def register_routes(app) -> None:
+def register_routes(app, limiter=None) -> None:
     """注册模型管理相关的 API 路由
 
     Args:
         app: Flask 应用实例
+        limiter: Flask-Limiter 实例（可选），用于速率限制
 
     注册的路由:
         GET  /api/models/list - 获取所有模型列表
@@ -419,7 +420,30 @@ def register_routes(app) -> None:
         >>> from flask import Flask
         >>> app = Flask(__name__)
         >>> register_routes(app)
+        >>> # 或带速率限制
+        >>> from flask_limiter import Limiter
+        >>> limiter = Limiter(app)
+        >>> register_routes(app, limiter)
     """
+    # 速率限制辅助函数（根据环境调整限制）
+    def rate_limit(limit_string: str):
+        """根据环境返回速率限制装饰器
+
+        Args:
+            limit_string: 限制字符串，如 "10 per minute"
+
+        Returns:
+            装饰器函数或恒等函数
+        """
+        if limiter is None:
+            # 没有 limiter 实例，返回恒等函数
+            return lambda f: f
+        if app.config.get('TESTING'):
+            # 测试环境：使用极高的限制
+            return limiter.limit("10000 per minute")
+        else:
+            # 生产环境：使用指定的限制
+            return limiter.limit(limit_string)
     @app.route("/api/models/list", methods=["GET"])
     def api_get_models() -> Response:
         return get_all_models()
@@ -428,20 +452,32 @@ def register_routes(app) -> None:
     def api_get_model(model_id: str) -> Union[Tuple[Response, int], Response]:
         return get_model(model_id)
 
+    # 添加模型的速率限制装饰器
+    add_model_limited = rate_limit("5 per minute")(add_model)
+
     @app.route("/api/models", methods=["POST"])
     def api_add_model() -> Union[Tuple[Response, int], Response]:
-        return add_model()
+        return add_model_limited()
+
+    # 删除模型的速率限制装饰器
+    delete_model_limited = rate_limit("10 per minute")(delete_model)
 
     @app.route("/api/models/<model_id>", methods=["DELETE"])
     def api_delete_model(model_id: str) -> Union[Tuple[Response, int], Response]:
-        return delete_model(model_id)
+        return delete_model_limited(model_id)
+
+    # 更新模型的速率限制装饰器
+    update_model_limited = rate_limit("10 per minute")(update_model)
 
     @app.route("/api/models/<model_id>", methods=["PUT"])
     def api_update_model(model_id: str) -> Union[Tuple[Response, int], Response]:
-        return update_model(model_id)
+        return update_model_limited(model_id)
+
+    # 上传图标的速率限制装饰器
+    upload_icon_limited = rate_limit("10 per minute")(upload_icon)
 
     @app.route("/api/models/icon/upload", methods=["POST"])
     def api_upload_icon() -> Union[Tuple[Response, int], Response]:
-        return upload_icon()
+        return upload_icon_limited()
 
     logger.debug("Registered model management routes")

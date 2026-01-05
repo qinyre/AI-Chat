@@ -16,11 +16,19 @@ import base64
 import logging
 from typing import Dict, List, Optional, Generator, Any, Union
 from dataclasses import dataclass
+from functools import wraps
 
 from openai import OpenAI
 import google.genai as genai
 from google.genai import types
 from dotenv import load_dotenv
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+    before_sleep_log
+)
 
 # 加载环境变量（优先从 .env 文件）
 load_dotenv()
@@ -44,6 +52,36 @@ class LLMConfig:
     temperature: float = 0.7
     max_tokens: int = 4096
     timeout: int = 30
+
+
+def _retry_generator(*retry_args, **retry_kwargs):
+    """为生成器函数添加重试机制的装饰器
+
+    Args:
+        *retry_args: tenacity.retry 的位置参数
+        **retry_kwargs: tenacity.retry 的关键字参数
+
+    Returns:
+        装饰器函数
+
+    Examples:
+        >>> @_retry_generator(
+        ...     stop=stop_after_attempt(3),
+        ...     wait=wait_exponential(multiplier=1, min=4, max=10)
+        ... )
+        ... def my_generator():
+        ...     yield "test"
+    """
+    def decorator(func):
+        @retry(*retry_args, **retry_kwargs)
+        def wrapper(*args, **kwargs):
+            # 调用原始生成器函数并返回生成器
+            return func(*args, **kwargs)
+        # 保留原始函数的生成器属性
+        if hasattr(func, '__wrapped__'):
+            wrapper.__wrapped__ = func.__wrapped__
+        return wrapper
+    return decorator
 
 
 class LLMWrapper:
@@ -359,6 +397,12 @@ class LLMWrapper:
             if content:
                 yield content
 
+    @_retry_generator(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((requests.exceptions.RequestException, requests.exceptions.HTTPError)),
+        before_sleep=before_sleep_log(logger, logging.INFO)
+    )
     def _chat_qwen(
         self,
         config: Dict[str, Any],
@@ -366,12 +410,17 @@ class LLMWrapper:
     ) -> Generator[str, None, None]:
         """Qwen 聊天方法（HTTP + SSE）
 
+        带有自动重试机制，网络临时故障时最多重试 3 次。
+
         Args:
             config: 模型配置字典
             messages: 消息列表
 
         Yields:
             str: 响应文本片段
+
+        Raises:
+            requests.exceptions.RequestException: 网络请求失败（重试 3 次后）
         """
         headers = {
             "Authorization": f"Bearer {config['api_key']}",
@@ -395,12 +444,20 @@ class LLMWrapper:
 
         yield from self._parse_sse_stream(response)
 
+    @_retry_generator(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((requests.exceptions.RequestException, requests.exceptions.HTTPError)),
+        before_sleep=before_sleep_log(logger, logging.INFO)
+    )
     def _chat_spark(
         self,
         config: Dict[str, Any],
         messages: List[Dict[str, str]]
     ) -> Generator[str, None, None]:
         """Spark 聊天方法（HTTP + SSE）
+
+        带有自动重试机制，网络临时故障时最多重试 3 次。
 
         注意：Spark API 不支持对话历史，每次只发送最后一条用户消息。
 
@@ -410,6 +467,9 @@ class LLMWrapper:
 
         Yields:
             str: 响应文本片段
+
+        Raises:
+            requests.exceptions.RequestException: 网络请求失败（重试 3 次后）
         """
         # Spark 格式化
         auth = config["api_key"]
@@ -442,6 +502,7 @@ class LLMWrapper:
             stream=True,
             timeout=self.config.timeout
         )
+        response.raise_for_status()
 
         yield from self._parse_sse_stream(response)
 
@@ -498,6 +559,12 @@ class LLMWrapper:
 
         return f"{message}.{signature_b64}"
 
+    @_retry_generator(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=4, max=10),
+        retry=retry_if_exception_type((requests.exceptions.RequestException, requests.exceptions.ConnectionError)),
+        before_sleep=before_sleep_log(logger, logging.INFO)
+    )
     def _chat_zhipu(
         self,
         config: Dict[str, Any],
@@ -505,12 +572,17 @@ class LLMWrapper:
     ) -> Generator[str, None, None]:
         """智谱 AI (GLM) 聊天方法（使用 JWT Token 认证）
 
+        带有自动重试机制，网络临时故障时最多重试 3 次。
+
         Args:
             config: 模型配置字典
             messages: 消息列表
 
         Yields:
             str: 响应文本片段
+
+        Raises:
+            requests.exceptions.RequestException: 网络请求失败（重试 3 次后）
         """
         base_url = config.get("base_url", "https://open.bigmodel.cn/api/paas/v4")
 
@@ -542,11 +614,5 @@ class LLMWrapper:
             timeout=self.config.timeout
         )
 
-        try:
-            response.raise_for_status()
-        except requests.HTTPError as e:
-            logger.error(f"Zhipu API HTTP error: {e}")
-            yield f"Error: HTTP {e.response.status_code} - {e.response.text}"
-            return
-
+        response.raise_for_status()
         yield from self._parse_sse_stream(response)
