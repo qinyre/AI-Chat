@@ -7,8 +7,9 @@ from model_manager import register_routes
 import os
 import json
 import logging
+import threading
 from dotenv import load_dotenv
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 
 # 加载环境变量
 load_dotenv()
@@ -82,6 +83,106 @@ def rate_limit(limit_string: str):
 API_KEYS_FILE = os.path.join(os.path.dirname(__file__), 'api_keys.json')
 
 
+class ConfigCache:
+    """配置缓存管理类
+
+    提供线程安全的配置缓存，支持自动失效机制。
+    通过检查文件修改时间来判断缓存是否有效。
+
+    Attributes:
+        _cache: 缓存的配置数据
+        _mtime: 文件修改时间
+        _lock: 线程锁，确保线程安全
+    """
+
+    def __init__(self) -> None:
+        """初始化配置缓存"""
+        self._cache: Dict[str, str] = {}
+        self._mtime: float = 0
+        self._lock = threading.Lock()
+
+    def _is_cache_valid(self) -> bool:
+        """检查缓存是否有效
+
+        通过比较文件修改时间来判断缓存是否过期。
+
+        Returns:
+            bool: 缓存有效返回 True，否则返回 False
+        """
+        if not os.path.exists(API_KEYS_FILE):
+            return False
+
+        current_mtime = os.path.getmtime(API_KEYS_FILE)
+        return current_mtime == self._mtime
+
+    def get(self, force_reload: bool = False) -> Dict[str, str]:
+        """获取配置（带缓存）
+
+        Args:
+            force_reload: 是否强制重新加载，忽略缓存
+
+        Returns:
+            Dict[str, str]: API 密钥字典
+        """
+        with self._lock:
+            # 如果缓存有效且不强制重新加载，直接返回缓存
+            if not force_reload and self._is_cache_valid() and self._cache:
+                return self._cache.copy()
+
+            # 缓存失效或强制重新加载，从文件加载
+            if os.path.exists(API_KEYS_FILE):
+                try:
+                    with open(API_KEYS_FILE, 'r', encoding='utf-8') as f:
+                        self._cache = json.load(f)
+                        self._mtime = os.path.getmtime(API_KEYS_FILE)
+                        logger.debug(f'API keys loaded from file (cache updated)')
+                except (json.JSONDecodeError, IOError) as e:
+                    logger.warning(f'Failed to load API keys from file: {e}')
+                    self._cache = {}
+                    self._mtime = 0
+            else:
+                self._cache = {}
+                self._mtime = 0
+
+            return self._cache.copy()
+
+    def set(self, api_keys: Dict[str, str]) -> bool:
+        """设置配置并保存到文件
+
+        Args:
+            api_keys: API 密钥字典
+
+        Returns:
+            bool: 保存是否成功
+        """
+        with self._lock:
+            try:
+                with open(API_KEYS_FILE, 'w', encoding='utf-8') as f:
+                    json.dump(api_keys, f, indent=2, ensure_ascii=False)
+                # 更新缓存和修改时间
+                self._cache = api_keys.copy()
+                self._mtime = os.path.getmtime(API_KEYS_FILE)
+                logger.info('API keys saved successfully (cache updated)')
+                return True
+            except IOError as e:
+                logger.error(f'Failed to save API keys to file: {e}')
+                return False
+
+    def invalidate(self) -> None:
+        """使缓存失效
+
+        下次调用 get() 时会重新从文件加载配置。
+        """
+        with self._lock:
+            self._cache = {}
+            self._mtime = 0
+            logger.debug('Config cache invalidated')
+
+
+# 创建全局配置缓存实例
+config_cache = ConfigCache()
+
+
 def load_api_keys_from_file() -> Dict[str, str]:
     """从本地文件加载 API 密钥配置
 
@@ -141,8 +242,8 @@ def get_models():
 
 @app.route('/api/config/load', methods=['GET'])
 def load_config():
-    """加载 API 密钥配置"""
-    api_keys = load_api_keys_from_file()
+    """加载 API 密钥配置（使用缓存）"""
+    api_keys = config_cache.get()
     return jsonify(api_keys)
 
 
@@ -150,7 +251,7 @@ def load_config():
 @rate_limit("5 per minute")  # 速率限制：每分钟最多 5 次请求
 @csrf.exempt  # API 端点使用其他认证方式
 def save_config() -> tuple[Response, int] | Response:
-    """保存 API 密钥配置
+    """保存 API 密钥配置（使用缓存）
 
     POST 请求格式:
     {
@@ -167,7 +268,7 @@ def save_config() -> tuple[Response, int] | Response:
         return jsonify({'success': False, 'message': 'Invalid request'}), 400
 
     api_keys = request.json
-    if save_api_keys_to_file(api_keys):
+    if config_cache.set(api_keys):
         return jsonify({'success': True, 'message': '配置已保存'})
     else:
         return jsonify({'success': False, 'message': '保存失败'}), 500
