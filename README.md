@@ -6,6 +6,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
+[![Tests](https://img.shields.io/badge/Tests-36%20passing-brightgreen.svg)](web_chat/tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 一个统一的 Web 界面，集成多个大型语言模型（LLM）提供商，支持实时流式聊天功能。
@@ -74,6 +75,17 @@
 - ✅ **RESTful API** - 标准的 HTTP 接口设计
 - ✅ **流式传输** - Python 生成器 + Flask 流式响应
 - ✅ **无框架前端** - 原生 JavaScript，无额外依赖
+
+### 🔒 安全特性
+
+- ✅ **CSRF 保护** - Flask-WTF 防护跨站请求伪造攻击
+- ✅ **XSS 防护** - DOMPurify 清理所有用户输入的 HTML 内容
+- ✅ **输入验证** - 完整的请求参数验证（类型、长度、格式）
+- ✅ **类型注解** - 完整的类型提示，减少运行时错误
+- ✅ **异常处理** - 具体的异常捕获，避免裸 except 子句
+- ✅ **日志记录** - 结构化日志记录，便于审计和调试
+- ✅ **环境变量** - 敏感配置通过环境变量管理
+- ✅ **测试覆盖** - 36 个自动化测试用例，确保代码质量
 
 ---
 
@@ -266,10 +278,13 @@ AI: Python 的主要特点包括...（基于上一轮对话的上下文）
 |------|------|------|
 | **Python** | 3.11+ | 主要编程语言 |
 | **Flask** | 3.0+ | Web 框架 |
+| **Flask-WTF** | 1.2+ | CSRF 保护 |
 | **requests** | 2.31+ | HTTP 请求库 |
 | **OpenAI SDK** | 1.0+ | DeepSeek、Moonshot 集成 |
 | **Google GenAI** | 0.3+ | Gemini 集成 |
-| **python-dotenv** | 1.0+ | 环境变量管理（可选） |
+| **python-dotenv** | 1.0+ | 环境变量管理 |
+| **pytest** | 7.4+ | 测试框架 |
+| **python-json-logger** | 2.0+ | JSON 日志格式化 |
 
 ### 前端
 
@@ -277,6 +292,7 @@ AI: Python 的主要特点包括...（基于上一轮对话的上下文）
 |------|------|
 | **原生 JavaScript (ES6+)** | 模块化交互逻辑 |
 | **Marked.js** | Markdown 渲染 |
+| **DOMPurify** | XSS 防护，HTML 清理 |
 | **Highlight.js** | 代码语法高亮 |
 | **TailwindCSS** | 样式框架（CDN） |
 
@@ -310,12 +326,20 @@ static/js/
 ```
 AI-Chat/
 ├── .claude/                    # AI 配置与索引
+├── .github/                    # GitHub Actions CI/CD
+│   └── workflows/
+│       └── tests.yml           # 自动化测试工作流
 ├── web_chat/                   # Web 应用主目录
 │   ├── app.py                  # Flask 应用入口
 │   ├── llm_wrapper.py          # LLM 抽象层核心
 │   ├── model_manager.py        # 模型管理模块
 │   ├── models.json.example     # 模型配置模板（Git 追踪）
 │   ├── models.json             # 用户模型配置（本地，不追踪）
+│   ├── tests/                  # 测试目录
+│   │   ├── __init__.py
+│   │   ├── conftest.py         # pytest 配置和 fixtures
+│   │   ├── test_app.py         # Flask API 集成测试
+│   │   └── test_llm_wrapper.py # LLMWrapper 单元测试
 │   ├── templates/
 │   │   ├── index.html          # 前端主页面
 │   │   └── model_manager.html  # 模型管理页面
@@ -342,8 +366,12 @@ AI-Chat/
 │   └── api_keys.json           # API 密钥本地存储（不追踪）
 │
 ├── docs/                       # 项目文档目录
-│   └── API_KEY_GUIDE.md        # API Key 申请指南
+│   ├── API_KEY_GUIDE.md        # API Key 申请指南
+│   ├── IMPLEMENTATION_PLAN.md  # 实施计划
+│   └── ROADMAP.md              # 开发路线图
+├── .env.example                # 环境变量示例
 ├── .gitignore                  # Git 忽略规则
+├── pytest.ini                  # pytest 配置
 ├── requirements.txt            # Python 依赖
 └── README.md                   # 本文档
 ```
@@ -434,16 +462,47 @@ AI-Chat/
 
 ### 运行测试
 
-```bash
-# 安装测试依赖
-pip install pytest pytest-flask pytest-cov
+项目包含 36 个自动化测试用例，覆盖核心功能和 API 端点：
 
-# 运行测试
+```bash
+# 激活虚拟环境
+# Windows
+venv\Scripts\activate
+# macOS / Linux
+source venv/bin/activate
+
+# 运行所有测试
 pytest
 
-# 生成覆盖率报告
-pytest --cov=web_chat --cov-report=html
+# 运行测试并生成覆盖率报告
+pytest --cov=web_chat --cov-report=html --cov-report=term-missing
+
+# 运行特定标记的测试
+pytest -m unit          # 仅运行单元测试
+pytest -m integration   # 仅运行集成测试
+
+# 查看详细输出
+pytest -v
+
+# 运行特定测试文件
+pytest web_chat/tests/test_app.py
+pytest web_chat/tests/test_llm_wrapper.py
 ```
+
+**测试覆盖**：
+- ✅ LLMWrapper 单元测试（15 个测试用例）
+- ✅ Flask API 集成测试（16 个测试用例）
+- ✅ 配置管理测试（5 个测试用例）
+
+### CI/CD 自动化
+
+项目使用 GitHub Actions 进行持续集成：
+
+- ✅ 自动运行测试套件
+- ✅ 多 Python 版本测试（3.11, 3.12）
+- ✅ 代码覆盖率报告
+- ✅ 类型检查（mypy）
+- ✅ 安全扫描（bandit）
 
 ---
 
@@ -520,6 +579,29 @@ pytest --cov=web_chat --cov-report=html
 - ✅ `models.json` 已被 `.gitignore` 忽略，不会被提交到 Git 仓库
 - ✅ 内置模型配置单独保存在 `models.json.example`（可安全提交）
 - ✅ 首次运行时自动从示例文件复制，确保用户有默认配置
+
+### ❓ 项目有哪些安全措施？
+
+**答**: 项目实施了完整的安全防护体系：
+
+**后端安全**：
+- ✅ **CSRF 保护** - 使用 Flask-WTF 防止跨站请求伪造攻击
+- ✅ **输入验证** - 完整的请求参数验证（类型、长度、格式、范围）
+- ✅ **异常处理** - 具体的异常捕获，避免信息泄露
+- ✅ **日志记录** - 结构化日志，便于安全审计
+- ✅ **环境变量** - 敏感配置通过环境变量管理，不硬编码
+- ✅ **Debug 模式** - 默认关闭，通过环境变量控制
+
+**前端安全**：
+- ✅ **XSS 防护** - DOMPurify 清理所有用户输入的 HTML 内容
+- ✅ **HTML 转义** - 错误消息等动态内容进行 HTML 转义
+- ✅ **内容安全** - Markdown 渲染前进行清理，防止恶意脚本注入
+
+**代码质量**：
+- ✅ **类型注解** - 完整的类型提示，减少运行时错误
+- ✅ **自动化测试** - 36 个测试用例确保代码正确性
+- ✅ **安全扫描** - 集成 bandit 进行安全漏洞扫描
+- ✅ **类型检查** - 使用 mypy 进行静态类型检查
 
 ---
 

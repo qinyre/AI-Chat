@@ -80,6 +80,7 @@ playwright_profile/
 *.bak
 *.cache
 .pytest_cache/
+nul
 # 临时和缓存文件
 
 # ====================
