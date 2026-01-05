@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)](https://flask.palletsprojects.com/)
 [![Tests](https://img.shields.io/badge/Tests-61%20passing-brightgreen.svg)](web_chat/tests/)
-[![Coverage](https://img.shields.io/badge/Coverage-90.67%25-brightgreen.svg)](web_chat/tests/)
+[![Coverage](https://img.shields.io/badge/Coverage-90.89%25-brightgreen.svg)](web_chat/tests/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 一个统一的 Web 界面，集成多个大型语言模型（LLM）提供商，支持实时流式聊天功能。
@@ -86,7 +86,9 @@
 - ✅ **异常处理** - 具体的异常捕获，避免裸 except 子句
 - ✅ **日志记录** - 结构化日志记录，便于审计和调试
 - ✅ **环境变量** - 敏感配置通过环境变量管理
-- ✅ **测试覆盖** - 36 个自动化测试用例，确保代码质量
+- ✅ **测试覆盖** - 61 个自动化测试用例，90.89% 覆盖率
+- ✅ **错误重试** - 网络故障自动重试，指数退避策略
+- ✅ **速率限制** - API 速率限制，防止滥用和过载
 
 ---
 
@@ -495,7 +497,7 @@ pytest web_chat/tests/test_llm_wrapper.py
 - ✅ Flask API 集成测试（16 个测试用例）
 - ✅ Model Manager 测试（25 个测试用例）
 - ✅ 配置管理测试（5 个测试用例）
-- ✅ 总覆盖率：**90.67%**（目标 60%）
+- ✅ 总覆盖率：**90.89%**（目标 60%）
 
 ### CI/CD 自动化
 
