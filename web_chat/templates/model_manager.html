@@ -3,35 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI NEXUS - 模型管理</title>
+    <title>模型管理 | AI NEXUS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        /* === Swiss/International Style Design System === */
+        /* 默认深色主题 */
         :root {
-            --bg-primary: #0d0d0f;
-            --bg-secondary: #16161a;
-            --bg-tertiary: #1e1e24;
-            --text-primary: #f4f4f5;
-            --text-secondary: #a1a1aa;
-            --text-tertiary: #71717a;
-            --accent-cyan: #00ffaa;
-            --accent-magenta: #ff6b9d;
-            --accent-yellow: #ffd93d;
-            --border-color: rgba(255, 255, 255, 0.06);
-            --glow-cyan: rgba(0, 255, 170, 0.15);
+            /* Neutral Palette - Dark Mode */
+            --bg-primary: #0C0A09;
+            --bg-secondary: #171412;
+            --bg-tertiary: #292524;
+            --bg-card: #1C1917;
+
+            /* Text Colors */
+            --text-primary: #FAFAF9;
+            --text-secondary: #A8A29E;
+            --text-tertiary: #78716C;
+            --text-inverse: #1C1917;
+
+            /* Accent - Warm Orange */
+            --accent: #F97316;
+            --accent-hover: #FB923C;
+            --accent-light: #431407;
+
+            /* Status Colors */
+            --success: #22C55E;
+            --success-bg: #052E16;
+            --error: #EF4444;
+            --error-bg: #450A0A;
+            --warning: #EAB308;
+            --warning-bg: #422006;
+
+            /* Borders */
+            --border-light: #292524;
+            --border-medium: #44403C;
+            --border-focus: var(--accent);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
         }
 
+        /* Light Mode (当添加 light-theme 类时) */
         body.light-theme {
-            --bg-primary: #fafafa;
-            --bg-secondary: #f0f0f2;
-            --bg-tertiary: #e5e5e8;
-            --text-primary: #18181b;
-            --text-secondary: #52525b;
-            --text-tertiary: #71717a;
-            --border-color: rgba(0, 0, 0, 0.06);
-            --glow-cyan: rgba(0, 255, 170, 0.2);
+            /* Neutral Palette - Light Mode */
+            --bg-primary: #FAFAF9;
+            --bg-secondary: #F5F5F4;
+            --bg-tertiary: #E7E5E4;
+            --bg-card: #FFFFFF;
+
+            /* Text Colors */
+            --text-primary: #1C1917;
+            --text-secondary: #57534E;
+            --text-tertiary: #A8A29E;
+            --text-inverse: #FFFFFF;
+
+            /* Accent */
+            --accent: #EA580C;
+            --accent-hover: #DC2626;
+            --accent-light: #FFEDD5;
+
+            /* Status Colors */
+            --success: #16A34A;
+            --success-bg: #F0FDF4;
+            --error: #DC2626;
+            --error-bg: #FEF2F2;
+            --warning: #CA8A04;
+            --warning-bg: #FEF9C3;
+
+            /* Borders */
+            --border-light: #E7E5E4;
+            --border-medium: #D6D3D1;
+            --border-focus: var(--accent);
+
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
         }
 
         * {
@@ -41,253 +93,613 @@
         }
 
         body {
-            font-family: 'Space Grotesk', -apple-system, sans-serif;
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
+            line-height: 1.5;
             min-height: 100vh;
-            transition: background 0.3s ease, color 0.3s ease;
+            transition: background 0.2s ease, color 0.2s ease;
         }
 
-        /* Animated background */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background:
-                radial-gradient(ellipse at 20% 20%, var(--glow-cyan) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(255, 107, 157, 0.08) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 0;
+        /* === Typography === */
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 600;
+            letter-spacing: -0.02em;
         }
 
-        /* Glass morphism container */
-        .glass-container {
-            background: rgba(22, 22, 26, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        .font-mono {
+            font-family: 'IBM Plex Mono', 'Courier New', monospace;
         }
 
-        .light-theme .glass-container {
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        /* === Header === */
+        .page-header {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-light);
+            padding: 24px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        /* Modal overlay */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(8px);
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-button {
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3000;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            color: var(--text-secondary);
+        }
+
+        .back-button:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-focus);
+            color: var(--text-primary);
+        }
+
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .add-model-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--accent);
+            color: var(--text-inverse);
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .add-model-btn:hover {
+            background: var(--accent-hover);
+        }
+
+        .add-model-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* === Main Content === */
+        .main-content {
+            padding: 32px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* === Model Grid === */
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+            gap: 20px;
+        }
+
+        /* === Model Card === */
+        .model-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.15s ease;
+        }
+
+        .model-card:hover {
+            border-color: var(--border-medium);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .model-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .model-icon img {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .card-title-group {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .model-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .builtin-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 4px;
+        }
+
+        .model-id {
+            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-tertiary);
+        }
+
+        .card-body {
+            padding: 16px 20px;
+        }
+
+        /* === Data Grid === */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .data-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .data-label {
+            font-size: 11px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-tertiary);
+        }
+
+        .data-value {
+            font-size: 13px;
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        /* === Status Indicator === */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: var(--success-bg);
+            color: var(--success);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 4px;
+        }
+
+        .status-indicator.disabled {
+            background: var(--bg-tertiary);
+            color: var(--text-tertiary);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        /* === Card Actions === */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-light);
+        }
+
+        .action-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--border-focus);
+        }
+
+        .action-btn.delete:hover {
+            background: var(--error-bg);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .action-btn svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* === Empty State === */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-secondary);
+            border: 2px dashed var(--border-medium);
+            border-radius: 8px;
+            color: var(--text-tertiary);
+        }
+
+        .empty-icon svg {
+            width: 32px;
+            height: 32px;
+        }
+
+        .empty-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .empty-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* === Loading === */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        /* === Theme Toggle === */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-medium);
+        }
+
+        .theme-toggle svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* === Modal === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
             padding: 24px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
         }
 
         .modal-overlay.active {
-            opacity: 1;
-            visibility: visible;
+            display: flex;
         }
 
-        .light-theme .modal-overlay {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        /* Modal content */
-        .modal-content {
+        .modal {
             width: 100%;
             max-width: 640px;
             max-height: 90vh;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-title svg {
+            width: 20px;
+            height: 20px;
+            color: var(--accent);
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-close svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .modal-body {
+            padding: 24px;
             overflow-y: auto;
-            border-radius: 20px;
-            transform: scale(0.95) translateY(20px);
-            transition: transform 0.3s ease;
+            flex: 1;
         }
 
-        .modal-overlay.active .modal-content {
-            transform: scale(1) translateY(0);
-        }
-
-        /* Custom scrollbar */
-        .modal-content::-webkit-scrollbar {
+        .modal-body::-webkit-scrollbar {
             width: 6px;
         }
 
-        .modal-content::-webkit-scrollbar-track {
-            background: transparent;
+        .modal-body::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
         }
 
-        .modal-content::-webkit-scrollbar-thumb {
-            background: var(--border-color);
+        .modal-body::-webkit-scrollbar-thumb {
+            background: var(--border-medium);
             border-radius: 3px;
         }
 
-        /* Form sections */
+        /* === Form Sections === */
         .form-section {
-            padding: 24px;
-            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
         }
 
         .form-section:last-child {
-            border-bottom: none;
+            margin-bottom: 0;
         }
 
-        /* Section title */
         .section-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.1em;
             color: var(--text-tertiary);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
-        /* Form group */
+        /* === Form Fields === */
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .form-group:last-child {
             margin-bottom: 0;
         }
 
-        /* Form label */
         .form-label {
-            display: block;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            margin-bottom: 6px;
+        }
+
+        .label-text {
             font-size: 13px;
             font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+            color: var(--text-primary);
         }
 
-        .form-label .required {
-            color: var(--accent-magenta);
-            margin-left: 2px;
+        .required {
+            color: var(--error);
         }
 
-        .form-label .hint {
+        .label-hint {
             font-size: 11px;
             color: var(--text-tertiary);
-            font-weight: 400;
-            margin-left: 8px;
         }
 
-        /* Form input */
-        .form-input, .form-select, .form-textarea {
+        .form-input,
+        .form-select {
             width: 100%;
-            padding: 12px 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
+            padding: 10px 12px;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
             color: var(--text-primary);
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
             outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-light);
         }
 
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--accent-cyan);
-            box-shadow: 0 0 0 3px var(--glow-cyan);
-        }
-
-        .form-input::placeholder, .form-textarea::placeholder {
+        .form-input::placeholder {
             color: var(--text-tertiary);
+        }
+
+        .form-input.error {
+            border-color: var(--error);
+        }
+
+        .form-input.error:focus {
+            box-shadow: 0 0 0 3px var(--error-bg);
+        }
+
+        .error-text {
+            font-size: 12px;
+            color: var(--error);
+            margin-top: 4px;
+            display: none;
+        }
+
+        .form-input.error + .error-text {
+            display: block;
         }
 
         .form-textarea {
             min-height: 80px;
             resize: vertical;
-            font-family: 'Space Grotesk', sans-serif;
+            font-family: 'IBM Plex Sans', sans-serif;
         }
 
-        /* Select dropdown styling */
-        .form-select {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23a1a1aa' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 40px;
-        }
-
-        /* API type badges */
-        .api-type-grid {
+        /* === Radio Group - API Types === */
+        .radio-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
         }
 
-        .api-type-option {
+        .radio-option {
             position: relative;
         }
 
-        .api-type-option input[type="radio"] {
+        .radio-option input[type="radio"] {
             position: absolute;
             opacity: 0;
             pointer-events: none;
         }
 
-        .api-type-label {
+        .radio-label {
             display: flex;
             align-items: center;
             gap: 10px;
-            padding: 14px 16px;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
+            padding: 12px 14px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
 
-        .api-type-label:hover {
-            border-color: var(--accent-cyan);
-            background: rgba(0, 255, 170, 0.05);
+        .radio-label:hover {
+            background: var(--bg-secondary);
         }
 
-        .api-type-option input[type="radio"]:checked + .api-type-label {
-            border-color: var(--accent-cyan);
-            background: var(--glow-cyan);
+        .radio-option input[type="radio"]:checked + .radio-label {
+            border-color: var(--accent);
+            background: var(--accent-light);
         }
 
-        .api-type-icon {
-            width: 32px;
-            height: 32px;
+        .radio-icon {
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: var(--bg-secondary);
-            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
             font-size: 14px;
         }
 
-        .api-type-info {
+        .radio-info {
             flex: 1;
         }
 
-        .api-type-name {
+        .radio-name {
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 500;
             color: var(--text-primary);
         }
 
-        .api-type-desc {
+        .radio-desc {
             font-size: 11px;
             color: var(--text-tertiary);
-            margin-top: 2px;
+            margin-top: 1px;
         }
 
-        /* Icon selector */
-        .icon-selector {
+        /* === Icon Selector === */
+        .icon-grid {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
@@ -304,583 +716,187 @@
         }
 
         .icon-label {
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             overflow: hidden;
         }
 
         .icon-label:hover {
-            border-color: var(--accent-cyan);
+            border-color: var(--border-focus);
         }
 
         .icon-option input[type="radio"]:checked + .icon-label {
-            border-color: var(--accent-cyan);
-            background: var(--glow-cyan);
-            box-shadow: 0 0 0 3px var(--glow-cyan);
+            border-color: var(--accent);
+            background: var(--accent-light);
+            box-shadow: 0 0 0 2px var(--accent);
         }
 
         .icon-label img {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             object-fit: contain;
         }
 
-        /* Upload button */
-        .upload-button {
+        .upload-btn {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            width: 56px;
-            height: 56px;
-            background: var(--bg-tertiary);
-            border: 2px dashed var(--border-color);
-            border-radius: 12px;
+            gap: 2px;
+            width: 52px;
+            height: 52px;
+            background: var(--bg-card);
+            border: 2px dashed var(--border-medium);
+            border-radius: 6px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
             color: var(--text-tertiary);
-            font-size: 20px;
         }
 
-        .upload-button:hover {
-            border-color: var(--accent-cyan);
-            color: var(--accent-cyan);
+        .upload-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
         }
 
-        .upload-button span {
-            font-size: 9px;
-            font-family: 'JetBrains Mono', monospace;
+        .upload-btn span:first-child {
+            font-size: 18px;
+            line-height: 1;
         }
 
-        #icon-upload-input {
-            display: none;
+        .upload-btn span:last-child {
+            font-size: 8px;
+            font-weight: 500;
         }
 
-        /* Dynamic field animation */
+        /* === Modal Actions === */
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+        }
+
+        .modal-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .modal-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .modal-btn.cancel {
+            background: var(--bg-card);
+            border: 1px solid var(--border-medium);
+            color: var(--text-secondary);
+        }
+
+        .modal-btn.cancel:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .modal-btn.delete {
+            background: var(--error-bg);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .modal-btn.delete:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .modal-btn.save {
+            background: var(--accent);
+            border: none;
+            color: white;
+        }
+
+        .modal-btn.save:hover {
+            background: var(--accent-hover);
+        }
+
+        /* === Dynamic Fields === */
         .dynamic-field {
             display: none;
-            animation: slideDown 0.2s ease;
         }
 
         .dynamic-field.visible {
             display: block;
         }
 
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
+        /* === Responsive === */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 16px 20px;
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            .header-left {
+                justify-content: space-between;
+            }
+
+            .page-title {
+                font-size: 20px;
+            }
+
+            .main-content {
+                padding: 20px;
+            }
+
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal {
+                max-height: 95vh;
+            }
+
+            .modal-header,
+            .modal-body,
+            .modal-actions {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .radio-grid {
+                grid-template-columns: 1fr;
             }
         }
 
-        /* Action buttons */
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            padding: 24px;
-            border-top: 1px solid var(--border-color);
+        @media (max-width: 480px) {
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
         }
 
-        .action-button {
-            flex: 1;
-            padding: 14px 24px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .button-cancel {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-        }
-
-        .button-cancel:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .button-delete {
-            background: rgba(255, 71, 87, 0.1);
-            color: #ff4757;
-        }
-
-        .button-delete:hover {
-            background: rgba(255, 71, 87, 0.2);
-        }
-
-        .button-save {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-
-            /* Glass morphism base */
-            background: rgba(22, 22, 26, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid transparent;
-            color: var(--text-primary);
-        }
-
-        .button-save::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            padding: 1px;
-            background: linear-gradient(135deg,
-                rgba(0, 255, 170, 0.5),
-                rgba(99, 102, 241, 0.3),
-                rgba(255, 107, 157, 0.5)
-            );
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.6;
-            transition: opacity 0.3s ease;
-        }
-
-        .button-save:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 8px 32px rgba(0, 255, 170, 0.15),
-                0 0 0 1px rgba(0, 255, 170, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-
-        .button-save:hover::before {
-            opacity: 1;
-        }
-
-        .button-save:active {
-            transform: translateY(0);
-        }
-
-        /* 浅色模式 */
-        .light-theme .button-save {
-            background: rgba(255, 255, 255, 0.7);
-            color: var(--text-primary);
-        }
-
-        .light-theme .button-save:hover {
-            box-shadow:
-                0 8px 32px rgba(0, 204, 136, 0.15),
-                0 0 0 1px rgba(0, 204, 136, 0.1);
-        }
-
-        /* Modal header */
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .modal-icon {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--glow-cyan);
-            border-radius: 10px;
-            font-size: 18px;
-        }
-
-        .close-button {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-tertiary);
-            border: none;
-            border-radius: 10px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 18px;
-        }
-
-        .close-button:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        /* Validation states */
-        .form-input.error, .form-select.error, .form-textarea.error {
-            border-color: #ff4757;
-        }
-
-        .error-message {
-            font-size: 11px;
-            color: #ff4757;
-            margin-top: 6px;
-            display: none;
-        }
-
-        .form-input.error + .error-message,
-        .form-select.error + .error-message,
-        .form-textarea.error + .error-message {
-            display: block;
-        }
-
-        /* Theme toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            width: 48px;
-            height: 48px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            cursor: pointer;
-            z-index: 100;
-            transition: all 0.3s ease;
-        }
-
-        .theme-toggle:hover {
-            border-color: var(--accent-cyan);
-        }
-
-        /* Page header */
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 32px 48px 24px;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-        }
-
-        .back-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            color: var(--text-secondary);
-        }
-
-        .back-btn:hover {
-            border-color: var(--accent-cyan);
-            transform: translateX(-2px);
-        }
-
-        .back-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .page-header h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 32px;
-            font-weight: 700;
-            margin: 0;
-            color: var(--text-primary);
-        }
-
-        .add-model-btn {
-            padding: 12px 24px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-
-            /* Glass morphism base */
-            background: rgba(22, 22, 26, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid transparent;
-
-            /* Gradient border using pseudo-element */
-            color: var(--text-primary);
-        }
-
-        .add-model-btn::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 12px;
-            padding: 1px;
-            background: linear-gradient(135deg,
-                rgba(0, 255, 170, 0.5),
-                rgba(99, 102, 241, 0.3),
-                rgba(255, 107, 157, 0.5)
-            );
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0.6;
-            transition: opacity 0.3s ease;
-        }
-
-        .add-model-btn span {
-            font-size: 16px;
-            filter: drop-shadow(0 0 8px rgba(0, 255, 170, 0.5));
-        }
-
-        .add-model-btn:hover {
-            transform: translateY(-2px);
-            box-shadow:
-                0 8px 32px rgba(0, 255, 170, 0.15),
-                0 0 0 1px rgba(0, 255, 170, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-
-        .add-model-btn:hover::before {
-            opacity: 1;
-        }
-
-        .add-model-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 浅色模式 */
-        .light-theme .add-model-btn {
-            background: rgba(255, 255, 255, 0.7);
-            color: var(--text-primary);
-        }
-
-        .light-theme .add-model-btn:hover {
-            box-shadow:
-                0 8px 32px rgba(0, 204, 136, 0.15),
-                0 0 0 1px rgba(0, 204, 136, 0.1);
-        }
-
-        /* Models container */
-        .models-container {
-            padding: 32px 48px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .models-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-            gap: 20px;
-        }
-
-        .model-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .model-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .model-card:hover {
-            border-color: var(--accent-cyan);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.15);
-        }
-
-        .model-card:hover::before {
-            opacity: 1;
-        }
-
-        .model-card-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-        }
-
-        .model-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .model-icon img {
-            width: 32px;
-            height: 32px;
-        }
-
-        .model-info {
-            flex: 1;
-        }
-
-        .model-name {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .model-id {
-            font-size: 12px;
-            color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace;
-        }
-
-        .model-details {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-        }
-
-        .model-detail-item {
-            font-size: 12px;
-        }
-
-        .model-detail-label {
-            color: var(--text-secondary);
-            margin-bottom: 4px;
-        }
-
-        .model-detail-value {
-            color: var(--text-primary);
-            font-family: 'JetBrains Mono', monospace;
-            word-break: break-all;
-        }
-
-        .model-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        .model-action-btn {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .model-action-btn:hover {
-            border-color: var(--accent-cyan);
-            background: var(--bg-secondary);
-        }
-
-        .model-action-btn.edit {
-            color: var(--accent-cyan);
-        }
-
-        .model-action-btn.delete {
-            color: #ef4444;
-        }
-
-        .model-action-btn.delete:hover {
-            border-color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
-        }
-
-        .builtin-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
-            color: #fff;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: 6px;
-            margin-left: 8px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-            font-size: 16px;
-            grid-column: 1 / -1;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: var(--text-secondary);
-        }
-
-        .empty-state-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
-            opacity: 0.5;
-        }
-
-        /* Preset icons list */
+        /* === Preset Icons === */
         .preset-icons {
             display: none;
         }
@@ -889,274 +905,294 @@
 <body>
     <!-- Theme Toggle -->
     <button class="theme-toggle" id="theme-toggle" title="切换主题">
-        <span class="theme-icon">🌙</span>
+        <svg id="theme-icon-dark" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+        </svg>
+        <svg id="theme-icon-light" style="display:none" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+        </svg>
     </button>
 
     <!-- Header -->
-    <div class="page-header">
+    <header class="page-header">
         <div class="header-left">
-            <button class="back-btn" id="back-to-home" title="返回主界面">
+            <button class="back-button" id="back-to-home" title="返回主界面">
                 <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                 </svg>
             </button>
-            <h1>🤖 模型管理</h1>
+            <h1 class="page-title">模型管理</h1>
         </div>
         <button class="add-model-btn" id="open-modal">
-            <span>+</span> 添加新模型
+            <svg fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            添加模型
         </button>
-    </div>
+    </header>
 
-    <!-- Models List Container -->
-    <div class="models-container">
-        <div id="models-list" class="models-list">
-            <!-- Models will be loaded here -->
+    <!-- Main Content -->
+    <main class="main-content">
+        <div id="models-list" class="models-grid">
             <div class="loading" id="loading">加载中...</div>
         </div>
-    </div>
+    </main>
 
     <!-- Preset Icons (hidden) -->
     <div class="preset-icons">
         <div id="preset-icon-gemini" style="display:none">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
         </div>
         <div id="preset-icon-openai" style="display:none">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" opacity="0.2"/>
-                <path d="M12 6v12M6 12h12" stroke="currentColor" stroke-width="2"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 8v8M8 12h8"/>
             </svg>
         </div>
         <div id="preset-icon-anthropic" style="display:none">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <rect x="3" y="3" width="18" height="18" rx="4" stroke="currentColor" stroke-width="2"/>
-                <path d="M9 12h6M12 9v6" stroke="currentColor" stroke-width="2"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="4"/>
+                <path d="M9 12h6M12 9v6"/>
             </svg>
         </div>
         <div id="preset-icon-cohere" style="display:none">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/>
-                <path d="M12 8v8M8 12h8" stroke="currentColor" stroke-width="2"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="8"/>
+                <path d="M12 8v8M8 12h8"/>
             </svg>
         </div>
         <div id="preset-icon-custom" style="display:none">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12h14"/>
+                <circle cx="12" cy="12" r="9"/>
             </svg>
         </div>
     </div>
 
-    <!-- Model Manager Modal -->
+    <!-- Model Modal -->
     <div class="modal-overlay" id="model-modal">
-        <div class="modal-content glass-container">
+        <div class="modal">
             <!-- Modal Header -->
             <div class="modal-header">
                 <div class="modal-title">
-                    <div class="modal-icon">⚙️</div>
-                    <span id="modal-title-text">添加新模型</span>
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                    <span id="modal-title-text">添加模型</span>
                 </div>
-                <button class="close-button" id="close-modal">✕</button>
+                <button class="modal-close" id="close-modal">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <!-- API Type Selection -->
-            <div class="form-section">
-                <div class="section-title">API 类型</div>
-                <div class="api-type-grid">
-                    <div class="api-type-option">
-                        <input type="radio" name="api_type" id="type_openai" value="openai" checked>
-                        <label class="api-type-label" for="type_openai">
-                            <div class="api-type-icon">🔷</div>
-                            <div class="api-type-info">
-                                <div class="api-type-name">OpenAI 兼容</div>
-                                <div class="api-type-desc">使用 OpenAI SDK</div>
-                            </div>
-                        </label>
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- API Type Selection -->
+                <div class="form-section">
+                    <div class="section-title">API 类型</div>
+                    <div class="radio-grid">
+                        <div class="radio-option">
+                            <input type="radio" name="api_type" id="type_openai" value="openai" checked>
+                            <label class="radio-label" for="type_openai">
+                                <div class="radio-icon">🔷</div>
+                                <div class="radio-info">
+                                    <div class="radio-name">OpenAI 兼容</div>
+                                    <div class="radio-desc">OpenAI SDK</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="api_type" id="type_google" value="google">
+                            <label class="radio-label" for="type_google">
+                                <div class="radio-icon">🔶</div>
+                                <div class="radio-info">
+                                    <div class="radio-name">Google Gemini</div>
+                                    <div class="radio-desc">专用 SDK</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="api_type" id="type_http" value="requests_sse">
+                            <label class="radio-label" for="type_http">
+                                <div class="radio-icon">🌐</div>
+                                <div class="radio-info">
+                                    <div class="radio-name">HTTP + SSE</div>
+                                    <div class="radio-desc">流式接口</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="api_type" id="type_spark" value="spark_requests">
+                            <label class="radio-label" for="type_spark">
+                                <div class="radio-icon">⚡</div>
+                                <div class="radio-info">
+                                    <div class="radio-name">Spark 特殊</div>
+                                    <div class="radio-desc">讯飞星火</div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" name="api_type" id="type_zhipu" value="zhipu">
+                            <label class="radio-label" for="type_zhipu">
+                                <div class="radio-icon">🔮</div>
+                                <div class="radio-info">
+                                    <div class="radio-name">智谱 GLM</div>
+                                    <div class="radio-desc">JWT Token</div>
+                                </div>
+                            </label>
+                        </div>
                     </div>
-                    <div class="api-type-option">
-                        <input type="radio" name="api_type" id="type_google" value="google">
-                        <label class="api-type-label" for="type_google">
-                            <div class="api-type-icon">🔶</div>
-                            <div class="api-type-info">
-                                <div class="api-type-name">Google Gemini</div>
-                                <div class="api-type-desc">专用 SDK</div>
-                            </div>
+                </div>
+
+                <!-- Basic Configuration -->
+                <div class="form-section">
+                    <div class="section-title">基本配置</div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-text">模型 ID</span>
+                            <span class="required">*</span>
                         </label>
+                        <input type="text" class="form-input font-mono" id="model-id" placeholder="gpt4" required>
+                        <div class="error-text">请输入模型 ID</div>
                     </div>
-                    <div class="api-type-option">
-                        <input type="radio" name="api_type" id="type_http" value="requests_sse">
-                        <label class="api-type-label" for="type_http">
-                            <div class="api-type-icon">🌐</div>
-                            <div class="api-type-info">
-                                <div class="api-type-name">HTTP + SSE</div>
-                                <div class="api-type-desc">通用流式接口</div>
-                            </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-text">模型名称</span>
+                            <span class="required">*</span>
                         </label>
+                        <input type="text" class="form-input" id="model-name" placeholder="GPT-4" required>
+                        <div class="error-text">请输入模型名称</div>
                     </div>
-                    <div class="api-type-option">
-                        <input type="radio" name="api_type" id="type_spark" value="spark_requests">
-                        <label class="api-type-label" for="type_spark">
-                            <div class="api-type-icon">⚡</div>
-                            <div class="api-type-info">
-                                <div class="api-type-name">Spark 特殊</div>
-                                <div class="api-type-desc">讯飞星火格式</div>
-                            </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-text">模型标识</span>
+                            <span class="required">*</span>
                         </label>
+                        <input type="text" class="form-input font-mono" id="model-identifier" placeholder="gpt-4-turbo" required>
+                        <div class="error-text">请输入模型标识</div>
                     </div>
-                    <div class="api-type-option">
-                        <input type="radio" name="api_type" id="type_zhipu" value="zhipu">
-                        <label class="api-type-label" for="type_zhipu">
-                            <div class="api-type-icon">🔮</div>
-                            <div class="api-type-info">
-                                <div class="api-type-name">智谱 GLM</div>
-                                <div class="api-type-desc">智谱 AI (JWT Token)</div>
-                            </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-text">API Key 环境变量名</span>
+                            <span class="required">*</span>
+                            <span class="label-hint">自动生成</span>
                         </label>
+                        <input type="text" class="form-input font-mono" id="api-key-name" placeholder="自动生成" readonly required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">
+                            <span class="label-text">API Key 值</span>
+                            <span class="required">*</span>
+                        </label>
+                        <input type="password" class="form-input font-mono" id="api-key-value" placeholder="sk-..." required>
+                        <div class="error-text">请输入 API Key</div>
+                    </div>
+                </div>
+
+                <!-- API Configuration -->
+                <div class="form-section">
+                    <div class="section-title">API 配置</div>
+
+                    <div class="form-group dynamic-field visible" id="field-base-url">
+                        <label class="form-label">
+                            <span class="label-text">API 基础 URL</span>
+                            <span class="required">*</span>
+                        </label>
+                        <input type="url" class="form-input font-mono" id="base-url" placeholder="https://api.openai.com/v1">
+                        <div class="error-text">请输入有效的 URL</div>
+                    </div>
+
+                    <div class="form-group dynamic-field" id="field-full-url">
+                        <label class="form-label">
+                            <span class="label-text">完整 API URL</span>
+                            <span class="required">*</span>
+                        </label>
+                        <input type="url" class="form-input font-mono" id="full-url" placeholder="https://api.example.com/v1/chat/completions">
+                        <div class="error-text">请输入有效的 URL</div>
+                    </div>
+
+                    <div class="form-group dynamic-field visible" id="field-system-prompt">
+                        <label class="form-label">
+                            <span class="label-text">系统提示词</span>
+                            <span class="label-hint">可选</span>
+                        </label>
+                        <textarea class="form-input form-textarea" id="system-prompt" placeholder="You are a helpful assistant..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Icon Selection -->
+                <div class="form-section">
+                    <div class="section-title">图标</div>
+                    <div class="icon-grid">
+                        <div class="icon-option">
+                            <input type="radio" name="model_icon" id="icon_gemini" value="gemini_logo.svg">
+                            <label class="icon-label" for="icon_gemini">
+                                <img src="/assets/icons/gemini_logo.svg" alt="Gemini" onerror="this.parentElement.innerHTML='🔶'">
+                            </label>
+                        </div>
+                        <div class="icon-option">
+                            <input type="radio" name="model_icon" id="icon_openai" value="deepseek_logo.svg" checked>
+                            <label class="icon-label" for="icon_openai">
+                                <img src="/assets/icons/deepseek_logo.svg" alt="OpenAI" onerror="this.parentElement.innerHTML='🔷'">
+                            </label>
+                        </div>
+                        <div class="icon-option">
+                            <input type="radio" name="model_icon" id="icon_kimi" value="kimi_logo.svg">
+                            <label class="icon-label" for="icon_kimi">
+                                <img src="/assets/icons/kimi_logo.svg" alt="Kimi" onerror="this.parentElement.innerHTML='🌙'">
+                            </label>
+                        </div>
+                        <div class="icon-option">
+                            <input type="radio" name="model_icon" id="icon_qwen" value="qwen_logo.svg">
+                            <label class="icon-label" for="icon_qwen">
+                                <img src="/assets/icons/qwen_logo.svg" alt="Qwen" onerror="this.parentElement.innerHTML='💠'">
+                            </label>
+                        </div>
+                        <div class="icon-option">
+                            <input type="radio" name="model_icon" id="icon_spark" value="spark_logo.svg">
+                            <label class="icon-label" for="icon_spark">
+                                <img src="/assets/icons/spark_logo.svg" alt="Spark" onerror="this.parentElement.innerHTML='⚡'">
+                            </label>
+                        </div>
+                        <label class="upload-btn" for="icon-upload-input">
+                            <span>+</span>
+                            <span>上传</span>
+                        </label>
+                        <input type="file" id="icon-upload-input" accept="image/*" style="display:none">
                     </div>
                 </div>
             </div>
 
-            <!-- Basic Configuration -->
-            <div class="form-section">
-                <div class="section-title">基本配置</div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        模型 ID <span class="required">*</span>
-                        <span class="hint">唯一标识符，如: gpt4, claude-opus</span>
-                    </label>
-                    <input type="text" class="form-input" id="model-id" placeholder="custom-model" required>
-                    <div class="error-message">请输入模型 ID</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        模型名称 <span class="required">*</span>
-                        <span class="hint">显示名称，如: GPT-4, Claude Opus</span>
-                    </label>
-                    <input type="text" class="form-input" id="model-name" placeholder="Custom Model" required>
-                    <div class="error-message">请输入模型名称</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        模型标识 <span class="required">*</span>
-                        <span class="hint">API 调用的模型名称</span>
-                    </label>
-                    <input type="text" class="form-input" id="model-identifier" placeholder="gpt-4-turbo" required>
-                    <div class="error-message">请输入模型标识</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        API Key 环境变量名 <span class="required">*</span>
-                        <span class="hint">如: CUSTOM_API_KEY（自动生成）</span>
-                    </label>
-                    <input type="text" class="form-input" id="api-key-name" placeholder="自动生成" readonly required>
-                    <div class="error-message">请输入模型 ID 以自动生成</div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        API Key 值 <span class="required">*</span>
-                        <span class="hint">您的实际 API Key，将保存到本地配置</span>
-                    </label>
-                    <input type="password" class="form-input" id="api-key-value" placeholder="sk-..." required>
-                    <div class="error-message">请输入 API Key 值</div>
-                </div>
-            </div>
-
-            <!-- API Configuration (Dynamic) -->
-            <div class="form-section">
-                <div class="section-title">API 配置</div>
-
-                <!-- Base URL (for OpenAI compatible) -->
-                <div class="form-group dynamic-field visible" id="field-base-url">
-                    <label class="form-label">
-                        API 基础 URL <span class="required">*</span>
-                        <span class="hint">OpenAI 兼容接口地址</span>
-                    </label>
-                    <input type="url" class="form-input" id="base-url" placeholder="https://api.openai.com/v1">
-                    <div class="error-message">请输入有效的 URL</div>
-                </div>
-
-                <!-- Full URL (for HTTP + SSE and Spark) -->
-                <div class="form-group dynamic-field" id="field-full-url">
-                    <label class="form-label">
-                        完整 API URL <span class="required">*</span>
-                        <span class="hint">包含完整路径的 API 地址</span>
-                    </label>
-                    <input type="url" class="form-input" id="full-url" placeholder="https://api.example.com/v1/chat/completions">
-                    <div class="error-message">请输入有效的 URL</div>
-                </div>
-
-                <!-- System Prompt (for OpenAI compatible only) -->
-                <div class="form-group dynamic-field visible" id="field-system-prompt">
-                    <label class="form-label">
-                        系统提示词
-                        <span class="hint">可选，设置模型的行为</span>
-                    </label>
-                    <textarea class="form-textarea" id="system-prompt" placeholder="You are a helpful assistant..."></textarea>
-                </div>
-            </div>
-
-            <!-- Icon Selection -->
-            <div class="form-section">
-                <div class="section-title">图标选择</div>
-                <div class="icon-selector">
-                    <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_gemini" value="gemini_logo.svg">
-                        <label class="icon-label" for="icon_gemini">
-                            <img src="/assets/icons/gemini_logo.svg" alt="Gemini" onerror="this.parentElement.innerHTML='🔶'">
-                        </label>
-                    </div>
-                    <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_openai" value="deepseek_logo.svg" checked>
-                        <label class="icon-label" for="icon_openai">
-                            <img src="/assets/icons/deepseek_logo.svg" alt="OpenAI" onerror="this.parentElement.innerHTML='🔷'">
-                        </label>
-                    </div>
-                    <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_kimi" value="kimi_logo.svg">
-                        <label class="icon-label" for="icon_kimi">
-                            <img src="/assets/icons/kimi_logo.svg" alt="Kimi" onerror="this.parentElement.innerHTML='🌙'">
-                        </label>
-                    </div>
-                    <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_qwen" value="qwen_logo.svg">
-                        <label class="icon-label" for="icon_qwen">
-                            <img src="/assets/icons/qwen_logo.svg" alt="Qwen" onerror="this.parentElement.innerHTML='💠'">
-                        </label>
-                    </div>
-                    <div class="icon-option">
-                        <input type="radio" name="model_icon" id="icon_spark" value="spark_logo.svg">
-                        <label class="icon-label" for="icon_spark">
-                            <img src="/assets/icons/spark_logo.svg" alt="Spark" onerror="this.parentElement.innerHTML='⚡'">
-                        </label>
-                    </div>
-                    <label class="upload-button" for="icon-upload-input">
-                        <span>+</span>
-                        <span>上传</span>
-                    </label>
-                    <input type="file" id="icon-upload-input" accept="image/*">
-                </div>
-            </div>
-
-            <!-- Actions -->
+            <!-- Modal Actions -->
             <div class="modal-actions">
-                <button class="action-button button-cancel" id="cancel-btn">取消</button>
-                <button class="action-button button-delete" id="delete-btn" style="display: none;">删除模型</button>
-                <button class="action-button button-save" id="save-btn">保存模型</button>
+                <button class="modal-btn cancel" id="cancel-btn">取消</button>
+                <button class="modal-btn delete" id="delete-btn" style="display:none">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                    删除
+                </button>
+                <button class="modal-btn save" id="save-btn">
+                    <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    保存
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // ========================================
-        // Model Manager - JavaScript
-        // ========================================
-
+        // === State ===
         const modal = document.getElementById('model-modal');
         const openModalBtn = document.getElementById('open-modal');
         const closeModalBtn = document.getElementById('close-modal');
@@ -1166,69 +1202,89 @@
         const themeToggle = document.getElementById('theme-toggle');
         const backToHomeBtn = document.getElementById('back-to-home');
 
-        // 返回主界面
-        backToHomeBtn.addEventListener('click', () => {
-            window.location.href = '/';
-        });
-
         let isEditMode = false;
         let editingModelId = null;
 
-        // Theme Toggle - 同步 localStorage
+        // === Theme Toggle ===
+        // 与主页面的主题保持同步 - 使用相同的 light-theme 类名
         function applyTheme(theme) {
             if (theme === 'light') {
                 document.body.classList.add('light-theme');
             } else {
                 document.body.classList.remove('light-theme');
             }
+            // 更新主题图标
+            document.getElementById('theme-icon-dark').style.display = theme === 'light' ? 'none' : 'block';
+            document.getElementById('theme-icon-light').style.display = theme === 'light' ? 'block' : 'none';
+        }
+
+        function getTheme() {
+            // 优先使用主页面的主题存储
+            const storedTheme = localStorage.getItem('theme');
+            if (storedTheme) {
+                return storedTheme;
+            }
+            // 兼容旧版本
+            const oldTheme = localStorage.getItem('model-manager-theme');
+            if (oldTheme) {
+                // 迁移到新存储键
+                localStorage.setItem('theme', oldTheme);
+                localStorage.removeItem('model-manager-theme');
+                return oldTheme;
+            }
+            return 'dark'; // 默认深色主题
+        }
+
+        function setTheme(theme) {
             localStorage.setItem('theme', theme);
-            updateThemeIcon(theme);
-        }
-
-        function updateThemeIcon(theme) {
-            const icon = themeToggle.querySelector('.theme-icon');
-            icon.textContent = theme === 'light' ? '☀️' : '🌙';
-        }
-
-        function getCurrentTheme() {
-            return document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            applyTheme(theme);
         }
 
         themeToggle.addEventListener('click', () => {
-            const currentTheme = getCurrentTheme();
-            applyTheme(currentTheme === 'light' ? 'dark' : 'light');
+            const currentTheme = document.body.classList.contains('light-theme') ? 'light' : 'dark';
+            setTheme(currentTheme === 'light' ? 'dark' : 'light');
         });
 
-        // 初始化主题
-        applyTheme(localStorage.getItem('theme') || 'dark');
-
-        // Open Modal
-        openModalBtn.addEventListener('click', () => {
-            isEditMode = false;
-            editingModelId = null;
-            document.getElementById('modal-title-text').textContent = '添加新模型';
-            deleteBtn.style.display = 'none';
-            resetForm();
-            modal.classList.add('active');
-        });
-
-        // Auto-generate API Key name from model ID
-        const modelIdInput = document.getElementById('model-id');
-        const apiKeyNameInput = document.getElementById('api-key-name');
-
-        modelIdInput.addEventListener('input', () => {
-            const modelId = modelIdInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '_');
-            if (modelId) {
-                apiKeyNameInput.value = `${modelId}_API_KEY`;
-            } else {
-                apiKeyNameInput.value = '';
+        // 监听其他页面的主题变化
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme' && e.newValue) {
+                applyTheme(e.newValue);
             }
         });
 
-        // Close Modal
+        // 监听页面可见性变化时同步主题
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                applyTheme(getTheme());
+            }
+        });
+
+        // Initialize theme from localStorage
+        applyTheme(getTheme());
+
+        // === Back to Home ===
+        backToHomeBtn.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        // === Modal ===
+        function openModal() {
+            modal.classList.add('active');
+        }
+
         function closeModal() {
             modal.classList.remove('active');
+            resetForm();
         }
+
+        openModalBtn.addEventListener('click', () => {
+            isEditMode = false;
+            editingModelId = null;
+            document.getElementById('modal-title-text').textContent = '添加模型';
+            deleteBtn.style.display = 'none';
+            resetForm();
+            openModal();
+        });
 
         closeModalBtn.addEventListener('click', closeModal);
         cancelBtn.addEventListener('click', closeModal);
@@ -1237,7 +1293,7 @@
             if (e.target === modal) closeModal();
         });
 
-        // API Type Change Handler
+        // === Dynamic Fields ===
         const apiTypeInputs = document.querySelectorAll('input[name="api_type"]');
         const fieldBaseUrl = document.getElementById('field-base-url');
         const fieldFullUrl = document.getElementById('field-full-url');
@@ -1245,25 +1301,17 @@
 
         function updateDynamicFields() {
             const selectedType = document.querySelector('input[name="api_type"]:checked').value;
-
-            // Reset all fields
             fieldBaseUrl.classList.remove('visible');
             fieldFullUrl.classList.remove('visible');
             fieldSystemPrompt.classList.remove('visible');
 
-            // Show relevant fields based on API type
             switch (selectedType) {
                 case 'openai':
                 case 'zhipu':
                     fieldBaseUrl.classList.add('visible');
                     fieldSystemPrompt.classList.add('visible');
                     break;
-                case 'google':
-                    // Google only needs basic config
-                    break;
                 case 'requests_sse':
-                    fieldFullUrl.classList.add('visible');
-                    break;
                 case 'spark_requests':
                     fieldFullUrl.classList.add('visible');
                     break;
@@ -1274,24 +1322,59 @@
             input.addEventListener('change', updateDynamicFields);
         });
 
-        // Initialize field visibility
         updateDynamicFields();
 
-        // Form Validation
+        // === Auto-generate API Key Name ===
+        const modelIdInput = document.getElementById('model-id');
+        const apiKeyNameInput = document.getElementById('api-key-name');
+
+        modelIdInput.addEventListener('input', () => {
+            const modelId = modelIdInput.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '_');
+            apiKeyNameInput.value = modelId ? `${modelId}_API_KEY` : '';
+        });
+
+        // === Icon Upload ===
+        const iconUploadInput = document.getElementById('icon-upload-input');
+        iconUploadInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const iconSelector = document.querySelector('.icon-grid');
+                    const uploadBtn = iconSelector.querySelector('.upload-btn');
+                    const customId = 'icon_custom_' + Date.now();
+
+                    const newOption = document.createElement('div');
+                    newOption.className = 'icon-option';
+                    newOption.innerHTML = `
+                        <input type="radio" name="model_icon" id="${customId}" value="${event.target.result}" checked>
+                        <label class="icon-label" for="${customId}">
+                            <img src="${event.target.result}" alt="Custom">
+                        </label>
+                    `;
+
+                    const prevCustom = iconSelector.querySelector('input[value^="data:image"]');
+                    if (prevCustom) prevCustom.parentElement.remove();
+
+                    iconSelector.insertBefore(newOption, uploadBtn);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // === Validation ===
         function validateForm() {
             let isValid = true;
             const selectedType = document.querySelector('input[name="api_type"]:checked').value;
 
-            // Required fields (API key value is optional in edit mode)
             const requiredFields = [
                 { id: 'model-id', message: '请输入模型 ID' },
                 { id: 'model-name', message: '请输入模型名称' },
                 { id: 'model-identifier', message: '请输入模型标识' }
             ];
 
-            // Add API key value validation only for new models
             if (!isEditMode) {
-                requiredFields.push({ id: 'api-key-value', message: '请输入 API Key 值' });
+                requiredFields.push({ id: 'api-key-value', message: '请输入 API Key' });
             }
 
             requiredFields.forEach(field => {
@@ -1327,47 +1410,11 @@
         }
 
         // Clear error on input
-        document.querySelectorAll('.form-input, .form-select').forEach(input => {
-            input.addEventListener('input', () => {
-                input.classList.remove('error');
-            });
+        document.querySelectorAll('.form-input').forEach(input => {
+            input.addEventListener('input', () => input.classList.remove('error'));
         });
 
-        // Icon Upload Handler
-        const iconUploadInput = document.getElementById('icon-upload-input');
-        iconUploadInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    // Create a new icon option with unique ID
-                    const iconSelector = document.querySelector('.icon-selector');
-                    const uploadBtn = iconSelector.querySelector('.upload-button');
-                    const customId = 'icon_custom_' + Date.now();
-
-                    const newOption = document.createElement('div');
-                    newOption.className = 'icon-option';
-                    // 将 data URL 作为 value 保存
-                    newOption.innerHTML = `
-                        <input type="radio" name="model_icon" id="${customId}" value="${event.target.result}" checked>
-                        <label class="icon-label" for="${customId}">
-                            <img src="${event.target.result}" alt="Custom">
-                        </label>
-                    `;
-
-                    // 移除之前的自定义图标选项
-                    const prevCustom = iconSelector.querySelector('input[value^="data:image"]');
-                    if (prevCustom) {
-                        prevCustom.parentElement.remove();
-                    }
-
-                    iconSelector.insertBefore(newOption, uploadBtn);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        // Save Model
+        // === Save Model ===
         saveBtn.addEventListener('click', async () => {
             if (!validateForm()) return;
 
@@ -1380,10 +1427,9 @@
                 type: document.querySelector('input[name="api_type"]:checked').value,
                 model: document.getElementById('model-identifier').value.trim(),
                 api_key_name: apiKeyName,
-                icon: document.querySelector('input[name="model_icon"]:checked')?.value || 'openai'
+                icon: document.querySelector('input[name="model_icon"]:checked')?.value || 'deepseek_logo.svg'
             };
 
-            // Add optional fields
             const baseUrl = document.getElementById('base-url').value.trim();
             if (baseUrl) modelData.base_url = baseUrl;
 
@@ -1394,27 +1440,19 @@
             if (systemPrompt) modelData.system = systemPrompt;
 
             try {
-                // For editing mode, if API key value is empty, try to use existing key
                 if (isEditMode && !apiKeyValue) {
                     try {
                         const configResponse = await fetch('/api/config/load');
                         const existingKeys = await configResponse.json();
                         apiKeyValue = existingKeys[apiKeyName] || '';
-                    } catch (e) {
-                        // If we can't load existing keys, continue without API key value
-                    }
+                    } catch (e) {}
                 }
 
-                // Require API key for new models
                 if (!isEditMode && !apiKeyValue) {
                     alert('请输入 API Key 值');
                     return;
                 }
 
-                // Save the model
-                console.log('Saving model:', modelData);
-
-                // 根据编辑模式选择不同的 API 端点和方法
                 const apiUrl = isEditMode ? `/api/models/${editingModelId}` : '/api/models';
                 const apiMethod = isEditMode ? 'PUT' : 'POST';
 
@@ -1427,17 +1465,11 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    // Save API Key to api_keys.json (only if value is provided)
                     if (apiKeyValue) {
                         try {
-                            // Load existing API keys
                             const configResponse = await fetch('/api/config/load');
                             const existingKeys = await configResponse.json();
-
-                            // Add/update the API key
                             existingKeys[apiKeyName] = apiKeyValue;
-
-                            // Save back to server
                             await fetch('/api/config/save', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -1449,33 +1481,30 @@
                     }
 
                     closeModal();
-                    alert('模型保存成功！');
+                    alert(isEditMode ? '模型更新成功！' : '模型添加成功！');
                     loadModelsList();
                 } else {
-                    throw new Error(result.message || '保存失败');
+                    throw new Error(result.message || '操作失败');
                 }
             } catch (error) {
                 console.error('Error saving model:', error);
-                alert('保存失败：' + error.message);
+                alert('操作失败：' + error.message);
             }
         });
 
-        // Delete Model
+        // === Delete Model ===
         deleteBtn.addEventListener('click', async () => {
             if (!editingModelId) return;
-
             if (confirm(`确定要删除模型 "${editingModelId}" 吗？`)) {
                 try {
                     const response = await fetch(`/api/models/${editingModelId}`, {
                         method: 'DELETE'
                     });
-
                     const result = await response.json();
 
                     if (result.success) {
                         closeModal();
                         alert('模型已删除！');
-                        // 可选：刷新模型列表
                         loadModelsList();
                     } else {
                         throw new Error(result.message || '删除失败');
@@ -1487,55 +1516,48 @@
             }
         });
 
-        // Reset Form
+        // === Reset Form ===
         function resetForm() {
             document.getElementById('model-id').value = '';
+            document.getElementById('model-id').disabled = false;
             document.getElementById('model-name').value = '';
             document.getElementById('model-identifier').value = '';
             document.getElementById('api-key-name').value = '';
             document.getElementById('api-key-value').value = '';
+            document.getElementById('api-key-value').placeholder = 'sk-...';
             document.getElementById('base-url').value = '';
             document.getElementById('full-url').value = '';
             document.getElementById('system-prompt').value = '';
             document.getElementById('type_openai').checked = true;
             document.getElementById('icon_openai').checked = true;
 
-            // Clear errors
-            document.querySelectorAll('.form-input, .form-select').forEach(el => {
-                el.classList.remove('error');
-            });
-
+            document.querySelectorAll('.form-input').forEach(el => el.classList.remove('error'));
             updateDynamicFields();
         }
 
-        // Edit Mode (for future use)
+        // === Edit Model ===
         function editModel(modelId) {
             isEditMode = true;
             editingModelId = modelId;
             document.getElementById('modal-title-text').textContent = '编辑模型';
-            deleteBtn.style.display = 'block';
+            deleteBtn.style.display = 'flex';
 
-            // Load model data from API
             fetch(`/api/models/${modelId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.model) {
                         const model = data.model;
 
-                        // Populate form with model data
                         document.getElementById('model-id').value = model.id || '';
-                        document.getElementById('model-id').disabled = true; // ID cannot be changed
+                        document.getElementById('model-id').disabled = true;
                         document.getElementById('model-name').value = model.name || '';
 
-                        // Set API type
                         const typeRadio = document.getElementById(`type_${model.type}`);
                         if (typeRadio) typeRadio.checked = true;
 
                         document.getElementById('model-identifier').value = model.model || '';
                         document.getElementById('api-key-name').value = model.api_key_name || '';
 
-                        // Load existing API key value (if available)
-                        // Note: For security, we just check if it exists, don't display the full value
                         fetch('/api/config/load')
                             .then(res => res.json())
                             .then(apiKeys => {
@@ -1544,11 +1566,8 @@
                                     document.getElementById('api-key-value').placeholder = '已配置（留空保持不变）';
                                 }
                             })
-                            .catch(() => {
-                                // Ignore error loading API keys
-                            });
+                            .catch(() => {});
 
-                        // Set optional fields based on type
                         if ((model.type === 'openai' || model.type === 'zhipu') && model.base_url) {
                             document.getElementById('base-url').value = model.base_url;
                         }
@@ -1559,17 +1578,13 @@
                             document.getElementById('system-prompt').value = model.system;
                         }
 
-                        // Set icon
                         if (model.icon) {
-                            // 检查是否是自定义图标（data URL）
                             if (model.icon.startsWith('data:')) {
-                                // 移除之前的自定义图标
                                 const prevCustom = document.querySelector('input[value^="data:image"]')?.parentElement;
                                 if (prevCustom) prevCustom.remove();
 
-                                // 创建新的自定义图标选项
-                                const iconSelector = document.querySelector('.icon-selector');
-                                const uploadBtn = iconSelector.querySelector('.upload-button');
+                                const iconSelector = document.querySelector('.icon-grid');
+                                const uploadBtn = iconSelector.querySelector('.upload-btn');
                                 const customId = 'icon_custom_' + Date.now();
 
                                 const newOption = document.createElement('div');
@@ -1582,11 +1597,8 @@
                                 `;
                                 iconSelector.insertBefore(newOption, uploadBtn);
                             } else {
-                                // 预设图标
                                 const iconRadio = document.querySelector(`input[name="model_icon"][value="${model.icon}"]`);
-                                if (iconRadio) {
-                                    iconRadio.checked = true;
-                                }
+                                if (iconRadio) iconRadio.checked = true;
                             }
                         }
 
@@ -1598,10 +1610,10 @@
                     alert('加载模型数据失败：' + err.message);
                 });
 
-            modal.classList.add('active');
+            openModal();
         }
 
-        // Load models list from API
+        // === Load Models List ===
         async function loadModelsList() {
             const modelsList = document.getElementById('models-list');
             const loading = document.getElementById('loading');
@@ -1617,9 +1629,13 @@
                     if (models.length === 0) {
                         modelsList.innerHTML = `
                             <div class="empty-state">
-                                <div class="empty-state-icon">🤖</div>
-                                <h3>暂无模型</h3>
-                                <p>点击上方"添加新模型"按钮开始添加</p>
+                                <div class="empty-icon">
+                                    <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                                    </svg>
+                                </div>
+                                <div class="empty-title">暂无模型</div>
+                                <div class="empty-description">点击"添加模型"按钮开始添加自定义模型</div>
                             </div>
                         `;
                         return;
@@ -1631,9 +1647,9 @@
 
                         return `
                             <div class="model-card">
-                                <div class="model-card-header">
+                                <div class="card-header">
                                     <div class="model-icon">${iconHtml}</div>
-                                    <div class="model-info">
+                                    <div class="card-title-group">
                                         <div class="model-name">
                                             ${model.name}
                                             ${isBuiltin ? '<span class="builtin-badge">内置</span>' : ''}
@@ -1641,33 +1657,48 @@
                                         <div class="model-id">${model.id}</div>
                                     </div>
                                 </div>
-                                <div class="model-details">
-                                    <div class="model-detail-item">
-                                        <div class="model-detail-label">API 类型</div>
-                                        <div class="model-detail-value">${getApiTypeName(model.type)}</div>
-                                    </div>
-                                    <div class="model-detail-item">
-                                        <div class="model-detail-label">模型</div>
-                                        <div class="model-detail-value">${model.model}</div>
-                                    </div>
-                                    <div class="model-detail-item">
-                                        <div class="model-detail-label">密钥变量</div>
-                                        <div class="model-detail-value">${model.api_key_name}</div>
-                                    </div>
-                                    <div class="model-detail-item">
-                                        <div class="model-detail-label">状态</div>
-                                        <div class="model-detail-value">${model.enabled ? '✓ 已启用' : '✗ 已禁用'}</div>
+                                <div class="card-body">
+                                    <div class="data-grid">
+                                        <div class="data-item">
+                                            <div class="data-label">API 类型</div>
+                                            <div class="data-value">${getApiTypeName(model.type)}</div>
+                                        </div>
+                                        <div class="data-item">
+                                            <div class="data-label">模型</div>
+                                            <div class="data-value">${model.model}</div>
+                                        </div>
+                                        <div class="data-item">
+                                            <div class="data-label">密钥变量</div>
+                                            <div class="data-value">${model.api_key_name}</div>
+                                        </div>
+                                        <div class="data-item">
+                                            <div class="data-label">状态</div>
+                                            <div class="status-indicator ${model.enabled ? '' : 'disabled'}">
+                                                <span class="status-dot"></span>
+                                                ${model.enabled ? '已启用' : '已禁用'}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="model-actions">
-                                    <button class="model-action-btn edit" onclick="editModel('${model.id}')">
+                                <div class="card-actions">
+                                    <button class="action-btn edit" onclick="editModel('${model.id}')">
+                                        <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487zm0 0L19.5 7.125" />
+                                        </svg>
                                         编辑
                                     </button>
                                     ${!isBuiltin ? `
-                                        <button class="model-action-btn delete" onclick="confirmDeleteModel('${model.id}', '${model.name}')">
+                                        <button class="action-btn delete" onclick="confirmDeleteModel('${model.id}', '${model.name}')">
+                                            <svg fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                                            </svg>
                                             删除
                                         </button>
-                                    ` : ''}
+                                    ` : `
+                                        <button class="action-btn" disabled style="opacity:0.5;cursor:not-allowed">
+                                            内置模型
+                                        </button>
+                                    `}
                                 </div>
                             </div>
                         `;
@@ -1677,9 +1708,13 @@
                 console.error('Error loading models list:', error);
                 modelsList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">⚠️</div>
-                        <h3>加载失败</h3>
-                        <p>${error.message}</p>
+                        <div class="empty-icon">
+                            <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                            </svg>
+                        </div>
+                        <div class="empty-title">加载失败</div>
+                        <div class="empty-description">${error.message}</div>
                     </div>
                 `;
             } finally {
@@ -1689,26 +1724,22 @@
 
         function getIconHtml(iconFile, modelName) {
             if (!iconFile) {
-                return '🤖';
+                return `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px;height:20px;color:var(--text-tertiary)"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>`;
             }
 
-            // 如果是 data URL（base64编码的自定义图片）
             if (iconFile.startsWith('data:')) {
-                return `<img src="${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+                return `<img src="${iconFile}" alt="${modelName}" onerror="this.parentElement.innerHTML='<svg fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke-width=\\'1.5\\' stroke=\\'currentColor\\' style=\\'width:20px;height:20px;color:var(--text-tertiary)\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' d=\\'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z\\' /></svg>'">`;
             }
 
-            // 如果是完整 URL（http/https）
             if (iconFile.startsWith('http')) {
-                return `<img src="${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+                return `<img src="${iconFile}" alt="${modelName}" onerror="this.parentElement.innerHTML='<svg fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke-width=\\'1.5\\' stroke=\\'currentColor\\' style=\\'width:20px;height:20px;color:var(--text-tertiary)\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' d=\\'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z\\' /></svg>'">`;
             }
 
-            // 如果是本地文件名（包含扩展名）
             if (iconFile.includes('.')) {
-                return `<img src="/assets/icons/${iconFile}" alt="${modelName}" onerror="this.src='about:blank';this.parentElement.innerHTML='🤖'">`;
+                return `<img src="/assets/icons/${iconFile}" alt="${modelName}" onerror="this.parentElement.innerHTML='<svg fill=\\'none\\' viewBox=\\'0 0 24 24\\' stroke-width=\\'1.5\\' stroke=\\'currentColor\\' style=\\'width:20px;height:20px;color:var(--text-tertiary)\\'><path stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\' d=\\'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z\\' /></svg>'">`;
             }
 
-            // 默认返回机器人表情
-            return '🤖';
+            return `<svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:20px;height:20px;color:var(--text-tertiary)"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" /></svg>`;
         }
 
         function getApiTypeName(type) {
@@ -1748,10 +1779,10 @@
             }
         }
 
-        // Initial load
+        // === Initial Load ===
         loadModelsList();
 
-        // Keyboard shortcuts
+        // === Keyboard Shortcuts ===
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && modal.classList.contains('active')) {
                 closeModal();

@@ -1,5 +1,16 @@
 // ==================== 聊天功能 ====================
 
+/**
+ * HTML 转义函数，防止 XSS 攻击
+ * @param {string} text - 需要转义的文本
+ * @returns {string} 转义后的文本
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 // DOM Elements
 const input = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
@@ -123,7 +134,8 @@ async function sendMessage() {
             if (done) break;
             const chunk = decoder.decode(value);
             fullText += chunk;
-            contentDiv.innerHTML = marked.parse(fullText);
+            // 使用 DOMPurify 清理 HTML 以防止 XSS 攻击
+            contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
             // 代码语法高亮
             contentDiv.querySelectorAll('pre code').forEach((block) => {
                 hljs.highlightElement(block);
@@ -149,7 +161,9 @@ async function sendMessage() {
                 aiMsgDiv.remove();
             }
         } else {
-            contentDiv.innerHTML = `<span style="color: var(--accent-magenta);">Error: ${err.message}</span>`;
+            // 使用 DOMPurify 清理错误消息（虽然内容是静态的，但保持一致性）
+            const errorHtml = `<span style="color: var(--accent-magenta);">Error: ${escapeHtml(err.message)}</span>`;
+            contentDiv.innerHTML = DOMPurify.sanitize(errorHtml);
         }
     } finally {
         window.appState.isSending = false;
@@ -178,7 +192,8 @@ function addMessage(role, text) {
     if (role === 'user') {
         content.textContent = text;
     } else {
-        content.innerHTML = text ? marked.parse(text) : '';
+        // 使用 DOMPurify 清理 Markdown 解析后的 HTML
+        content.innerHTML = text ? DOMPurify.sanitize(marked.parse(text)) : '';
         // 代码语法高亮
         content.querySelectorAll('pre code').forEach((block) => {
             hljs.highlightElement(block);

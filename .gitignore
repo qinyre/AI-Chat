@@ -47,6 +47,14 @@ share/python-wheels/
 htmlcov/
 # 测试覆盖率文件
 
+# 虚拟环境
+venv/
+env/
+ENV/
+# 日志文件
+*.log
+web_chat.log
+
 # ====================
 # IDE 与编辑器
 # ====================
