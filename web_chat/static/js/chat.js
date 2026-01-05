@@ -11,6 +11,179 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
+// ==================== 错误处理系统 ====================
+
+/**
+ * 错误类型枚举
+ */
+const ErrorType = {
+    NETWORK: 'network',           // 网络连接错误
+    API_KEY: 'api_key',           // API 密钥无效或缺失
+    RATE_LIMIT: 'rate_limit',     // 速率限制
+    TIMEOUT: 'timeout',           // 请求超时
+    SERVER_ERROR: 'server_error', // 服务器错误
+    UNKNOWN: 'unknown'            // 未知错误
+};
+
+/**
+ * 错误消息映射
+ * 每种错误类型包含：title（标题）、message（描述）、icon（图标）、solution（解决建议）
+ */
+const ERROR_MESSAGES = {
+    [ErrorType.NETWORK]: {
+        title: '网络连接错误',
+        message: '无法连接到服务器，请检查网络连接',
+        icon: '🌐',
+        solution: '建议：\n1. 检查网络连接是否正常\n2. 确认可以访问外网\n3. 稍后重试'
+    },
+    [ErrorType.API_KEY]: {
+        title: 'API 密钥错误',
+        message: 'API 密钥无效或未配置',
+        icon: '🔑',
+        solution: '建议：\n1. 点击设置图标打开 API 配置\n2. 检查对应模型的 API 密钥是否正确\n3. 重新配置密钥后重试'
+    },
+    [ErrorType.RATE_LIMIT]: {
+        title: '请求过于频繁',
+        message: '已超过 API 速率限制',
+        icon: '⏱️',
+        solution: '建议：\n1. 等待一段时间后重试\n2. 降低请求频率\n3. 如需更高限制，请联系管理员'
+    },
+    [ErrorType.TIMEOUT]: {
+        title: '请求超时',
+        message: '服务器响应时间过长',
+        icon: '⏰',
+        solution: '建议：\n1. 检查网络连接速度\n2. 稍后重试\n3. 尝试缩短问题长度'
+    },
+    [ErrorType.SERVER_ERROR]: {
+        title: '服务器错误',
+        message: '服务器处理请求时出错',
+        icon: '⚠️',
+        solution: '建议：\n1. 稍后重试\n2. 如果问题持续，请联系技术支持'
+    },
+    [ErrorType.UNKNOWN]: {
+        title: '未知错误',
+        message: '发生了意外错误',
+        icon: '❓',
+        solution: '建议：\n1. 刷新页面重试\n2. 检查浏览器控制台获取详细错误信息\n3. 联系技术支持'
+    }
+};
+
+/**
+ * 分析错误并返回错误类型
+ * @param {Error} error - 错误对象
+ * @param {Response} response - 可选的响应对象
+ * @returns {string} 错误类型
+ */
+function classifyError(error, response = null) {
+    // 检查错误名称和消息
+    if (error.name === 'AbortError') {
+        return 'ABORTED'; // 用户主动中断，特殊处理
+    }
+
+    const errorMessage = error.message?.toLowerCase() || '';
+    const errorName = error.name?.toLowerCase() || '';
+
+    // 网络错误
+    if (errorName === 'networkerror' ||
+        errorMessage.includes('network') ||
+        errorMessage.includes('fetch')) {
+        return ErrorType.NETWORK;
+    }
+
+    // 超时错误
+    if (errorMessage.includes('timeout') ||
+        errorName === 'timeouterror') {
+        return ErrorType.TIMEOUT;
+    }
+
+    // 检查 HTTP 状态码
+    if (response) {
+        const status = response.status;
+
+        // 401 Unauthorized - API 密钥错误
+        if (status === 401 || status === 403) {
+            return ErrorType.API_KEY;
+        }
+
+        // 429 Too Many Requests - 速率限制
+        if (status === 429) {
+            return ErrorType.RATE_LIMIT;
+        }
+
+        // 5xx 服务器错误
+        if (status >= 500) {
+            return ErrorType.SERVER_ERROR;
+        }
+    }
+
+    // API 密钥相关错误消息
+    if (errorMessage.includes('api') ||
+        errorMessage.includes('key') ||
+        errorMessage.includes('unauthorized') ||
+        errorMessage.includes('authentication')) {
+        return ErrorType.API_KEY;
+    }
+
+    // 默认为未知错误
+    return ErrorType.UNKNOWN;
+}
+
+/**
+ * 获取用户友好的错误消息
+ * @param {string} errorType - 错误类型
+ * @param {Error} error - 原始错误对象
+ * @returns {string} 格式化的错误消息
+ */
+function getFriendlyErrorMessage(errorType, error = null) {
+    const errorInfo = ERROR_MESSAGES[errorType] || ERROR_MESSAGES[ErrorType.UNKNOWN];
+
+    let message = `${errorInfo.icon} ${errorInfo.title}\n\n${errorInfo.message}`;
+
+    // 如果有解决方案，添加解决方案
+    if (errorInfo.solution) {
+        message += `\n\n${errorInfo.solution}`;
+    }
+
+    // 调试模式下显示原始错误信息
+    if (error && error.message) {
+        message += `\n\n[调试信息] ${error.message}`;
+    }
+
+    return message;
+}
+
+/**
+ * 显示错误通知
+ * @param {string} errorType - 错误类型
+ * @param {Error} error - 原始错误对象
+ */
+function showErrorNotification(errorType, error = null) {
+    const errorInfo = ERROR_MESSAGES[errorType] || ERROR_MESSAGES[ErrorType.UNKNOWN];
+    const message = `${errorInfo.icon} ${errorInfo.title}: ${errorInfo.message}`;
+    showNotification(message, 'error');
+}
+
+/**
+ * 创建错误消息 HTML（用于聊天界面）
+ * @param {string} errorType - 错误类型
+ * @param {Error} error - 原始错误对象
+ * @returns {string} HTML 字符串
+ */
+function createErrorMessageHtml(errorType, error = null) {
+    const errorInfo = ERROR_MESSAGES[errorType] || ERROR_MESSAGES[ErrorType.UNKNOWN];
+
+    return `
+        <div style="display: flex; align-items: start; gap: 12px; padding: 16px; background: rgba(255, 107, 157, 0.1); border: 1px solid rgba(255, 107, 157, 0.3); border-radius: 12px;">
+            <div style="font-size: 24px; flex-shrink: 0;">${errorInfo.icon}</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">${errorInfo.title}</div>
+                <div style="color: var(--text-secondary); font-size: 14px; line-height: 1.5;">${errorInfo.message}</div>
+                ${errorInfo.solution ? `<div style="margin-top: 8px; padding: 8px 12px; background: rgba(255, 107, 157, 0.1); border-radius: 8px; font-size: 13px; color: var(--text-secondary); white-space: pre-line;">${errorInfo.solution}</div>` : ''}
+            </div>
+        </div>
+    `;
+}
+
 // DOM Elements
 const input = document.getElementById('user-input');
 const sendBtn = document.getElementById('send-btn');
@@ -109,8 +282,10 @@ async function sendMessage() {
     // 创建 AbortController 用于中断请求
     window.appState.abortController = new AbortController();
 
+    let response = null; // 在 try 外部声明，以便 catch 中访问
+
     try {
-        const response = await fetch('/api/chat', {
+        response = await fetch('/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -126,22 +301,57 @@ async function sendMessage() {
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let fullText = '';
+        let lastUpdateTime = 0;
+        let pendingChunks = [];
 
         contentDiv.innerHTML = '';
+
+        // 节流函数：限制 DOM 更新频率
+        function shouldUpdate(now) {
+            // 每 50ms 最多更新一次，或者累计了 5 个 chunk
+            return now - lastUpdateTime > 50 || pendingChunks.length >= 5;
+        }
+
+        // 渲染函数
+        function renderContent() {
+            if (fullText.trim()) {
+                // 使用 DOMPurify 清理 HTML 以防止 XSS 攻击
+                const html = DOMPurify.sanitize(marked.parse(fullText));
+                contentDiv.innerHTML = html;
+
+                // 代码语法高亮（仅在有代码块时执行）
+                if (html.includes('<pre>')) {
+                    contentDiv.querySelectorAll('pre code').forEach((block) => {
+                        hljs.highlightElement(block);
+                    });
+                }
+
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            lastUpdateTime = performance.now();
+            pendingChunks = [];
+        }
 
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-            const chunk = decoder.decode(value);
+
+            const chunk = decoder.decode(value, { stream: true });
             fullText += chunk;
-            // 使用 DOMPurify 清理 HTML 以防止 XSS 攻击
-            contentDiv.innerHTML = DOMPurify.sanitize(marked.parse(fullText));
-            // 代码语法高亮
-            contentDiv.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightElement(block);
-            });
-            chatContainer.scrollTop = chatContainer.scrollHeight;
+            pendingChunks.push(chunk);
+
+            const now = performance.now();
+
+            // 检查是否应该更新 DOM
+            if (shouldUpdate(now)) {
+                // 使用 requestAnimationFrame 优化渲染时机
+                await new Promise(resolve => requestAnimationFrame(resolve));
+                renderContent();
+            }
         }
+
+        // 最终渲染（确保所有内容都被渲染）
+        renderContent();
 
         window.appState.addMessageToHistory(window.appState.currentModel, 'assistant', fullText);
     } catch (err) {
@@ -161,9 +371,15 @@ async function sendMessage() {
                 aiMsgDiv.remove();
             }
         } else {
-            // 使用 DOMPurify 清理错误消息（虽然内容是静态的，但保持一致性）
-            const errorHtml = `<span style="color: var(--accent-magenta);">Error: ${escapeHtml(err.message)}</span>`;
+            // 使用新的错误分类系统
+            const errorType = classifyError(err, response);
+
+            // 在聊天界面显示详细错误信息
+            const errorHtml = createErrorMessageHtml(errorType, err);
             contentDiv.innerHTML = DOMPurify.sanitize(errorHtml);
+
+            // 显示错误通知
+            showErrorNotification(errorType, err);
         }
     } finally {
         window.appState.isSending = false;
@@ -210,9 +426,17 @@ function addMessage(role, text) {
     return content;
 }
 
-// 清空对话历史
+// 清空对话历史（带确认对话框）
 function clearHistory() {
     if (!window.appState.currentModel) return;
+
+    // 显示确认对话框
+    const modelName = window.appState.currentModel.toUpperCase();
+    const confirmed = confirm(`确定要清空与 ${modelName} 的对话记录吗？\n\n此操作不可撤销，所有对话历史将被永久删除。`);
+
+    if (!confirmed) return; // 用户取消
+
+    // 用户确认，执行清空操作
     window.appState.clearHistory(window.appState.currentModel);
     const iconUrl = getModelIconUrl(window.appState.currentModel);
     const iconBgClass = getModelIconBgClass(window.appState.currentModel);
@@ -221,9 +445,12 @@ function clearHistory() {
             <div class="welcome-icon ${iconBgClass}">
                 <img src="${iconUrl}" style="width:48px;height:48px;" alt="${window.appState.currentModel}">
             </div>
-            <h1 class="welcome-title">与 ${window.appState.currentModel.toUpperCase()} 对话</h1>
+            <h1 class="welcome-title">与 ${modelName} 对话</h1>
             <p class="welcome-subtitle">输入你的问题，AI 将实时为你解答</p>
         </div>`;
+
+    // 显示成功提示
+    showNotification(`已清空 ${modelName} 的对话记录`, 'success');
 }
 
 // Button events
